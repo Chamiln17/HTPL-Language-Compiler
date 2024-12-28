@@ -107,8 +107,8 @@ unary_expression:
     ;
 
 primary_expression:
-    PARENOUV arith_expression PARENFERM
-    | TOKEN_INTEGER
+    TOKEN_OPEN_PARENTHESIS arith_expression TOKEN_CLOSE_PARENTHESIS
+    | TOKEN_INT
     | TOKEN_FLOAT
     | TOKEN_BOOLEAN
     ;
