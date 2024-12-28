@@ -1,0 +1,4 @@
+Résultat de l'analyse syntaxique de acabb# :
+--------------------------------
+Statut: Succès
+Message: Analyse syntaxique terminée avec succès
