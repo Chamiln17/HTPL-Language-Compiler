@@ -1,3 +1,20 @@
-<if condition=(x >> 0)>
-        <assign sum=(a + b)/>
-</if>
+<program>
+<variables>
+        <int name="counter">(0+8-5)</int>
+        <string name="message">"Test"</string>
+    </variables>
+    
+    <instructions>
+        <assign x=(x - 1)/>
+        <print value="Counter initialized to 10"/>
+        
+        <while condition=(counter >> 0)>
+            <print value="Counter: + counter"/>
+            <assign x=(x - 1)/>
+        </while>
+        
+        <if condition=(counter == 0)>
+            <print value="Counter reached zero"/>
+        </if>
+    </instructions>
+</program>

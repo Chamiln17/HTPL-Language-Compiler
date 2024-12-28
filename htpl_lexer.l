@@ -2,62 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "syntaxique.tab.h"
 
 #define OUTPUT_METHOD "FILE" // FILE or CONSOLE
 #define OUTPUTFILE "lexical-lexemes" // Output file name
 
 // Define token types
-enum TokenType {
-    TOKEN_PROGRAM_OPEN = 1,
-    TOKEN_PROGRAM_CLOSE,
-    TOKEN_VARIABLES_OPEN,
-    TOKEN_VARIABLES_CLOSE,
-    TOKEN_INSTRUCTIONS_OPEN,
-    TOKEN_INSTRUCTIONS_CLOSE,
-    TOKEN_ASSIGN_OPEN,
-    TOKEN_ASSIGN_CLOSE,
-    TOKEN_PRINT_OPEN,
-    TOKEN_PRINT_CLOSE,
-    TOKEN_IF_OPEN,
-    TOKEN_IF_CLOSE,
-    TOKEN_ELSE,
-    TOKEN_VAR_INT_OPEN,
-    TOKEN_VAR_INT_CLOSE,
-    TOKEN_VAR_FLOAT_OPEN,
-    TOKEN_VAR_FLOAT_CLOSE,
-    TOKEN_VAR_BOOLEAN_OPEN,
-    TOKEN_VAR_BOOLEAN_CLOSE,
-    TOKEN_VAR_STRING_OPEN,
-    TOKEN_VAR_STRING_CLOSE,
-    TOKEN_EXPRESSION,
-    TOKEN_STRING,
-    TOKEN_ATTRIBUTE_NAME,
-    TOKEN_SELF_CLOSING_TAG,
-    TOKEN_END_TAG,
-    TOKEN_WHILE_CLOSE,
-    TOKEN_WHILE_OPEN,
-    TOKEN_ARRAY_CLOSE,
-    TOKEN_ARRAY_OPEN,
-    TOKEN_ELEMENT_OPEN,
-    TOKEN_UNRECOGNIZED,
-    TOKEN_PLUS,
-    TOKEN_MINUS,
-    TOKEN_MULTIPLY,
-    TOKEN_DIVIDE,
-    TOKEN_GREATER_THAN,
-    TOKEN_LOWER_THAN,
-    TOKEN_ASSIGN,
-    TOKEN_LOWER_OR_EQUAL,
-    TOKEN_GREATER_OR_EQUAL,
-    TOKEN_OPEN_PARENTHESIS,
-    TOKEN_CLOSE_PARENTHESIS,
-    TOKEN_QUOTE,
-    TOKEN_EQUAL,
-    IDENTIFICATEUR,
-    TOKEN_FLOAT,
-    TOKEN_INT,
-    TOKEN_BOOLEAN
-};
+
 
 // Global variable to hold the current token type
 int current_token;
@@ -89,7 +40,6 @@ void token_action(int token, char* text, FILE* output_file) {
         case TOKEN_VAR_STRING_CLOSE: token_name = "VAR_STRING_CLOSE"; break;
         case TOKEN_EXPRESSION: token_name = "EXPRESSION"; break;
         case TOKEN_STRING: token_name = "STRING"; break;
-        case TOKEN_ATTRIBUTE_NAME: token_name = "ATTRIBUTE_NAME"; break;
         case TOKEN_SELF_CLOSING_TAG: token_name = "SELF_CLOSING_TAG"; break;
         case TOKEN_END_TAG: token_name = "END_TAG"; break;
         case TOKEN_WHILE_CLOSE: token_name = "WHILE_CLOSE"; break;
@@ -146,7 +96,7 @@ comment     \#[^\n]*
 [ \t\n]+              { /* Ignore spaces, tabs, and newlines */ }
 {comment}             { /* Ignore comments */ }
 
-"<program"            { current_token = TOKEN_PROGRAM_OPEN; token_action(current_token, yytext, output_file); return current_token; }
+"<program>"            { current_token = TOKEN_PROGRAM_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 "</program>"          { current_token = TOKEN_PROGRAM_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 "<variables>"         { current_token = TOKEN_VARIABLES_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 "</variables>"        { current_token = TOKEN_VARIABLES_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
@@ -211,7 +161,7 @@ comment     \#[^\n]*
 .                     { current_token = TOKEN_UNRECOGNIZED; token_action(current_token, yytext, output_file); return current_token; }
 
 %%
-
+/*
 int main(int argc, char **argv) {
     
     // Open input file if provided
@@ -248,4 +198,4 @@ int main(int argc, char **argv) {
 
     printf("Lexical analysis complete.\n");
     return 0;
-}
+}*/
