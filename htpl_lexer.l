@@ -40,7 +40,19 @@ enum TokenType {
     TOKEN_ARRAY_CLOSE,
     TOKEN_ARRAY_OPEN,
     TOKEN_ELEMENT_OPEN,
-    TOKEN_UNRECOGNIZED
+    TOKEN_UNRECOGNIZED,
+    TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_MULTIPLY,
+    TOKEN_DIVIDE,
+    TOKEN_GREATER_THAN,
+    TOKEN_LOWER_THAN,
+    TOKEN_ASSIGN,
+    TOKEN_LOWER_OR_EQUAL,
+    TOKEN_GREATER_OR_EQUAL,
+    TOKEN_OPEN_PARENTHESIS,
+    TOKEN_CLOSE_PARENTHESIS,
+    TOKEN_QUOTE
 };
 
 // Global variable to hold the current token type
@@ -82,6 +94,18 @@ void token_action(int token, char* text, FILE* output_file) {
         case TOKEN_ARRAY_CLOSE: token_name = "ARRAY_CLOSE"; break;
         case TOKEN_ARRAY_OPEN: token_name = "ARRAY_OPEN"; break;
         case TOKEN_ELEMENT_OPEN: token_name = "ELEMENT_OPEN"; break;
+        case TOKEN_PLUS: token_name = "PLUS"; break;
+        case TOKEN_MINUS: token_name = "MINUS"; break;
+        case TOKEN_MULTIPLY: token_name = "MULTIPLY"; break;
+        case TOKEN_DIVIDE: token_name = "DIVIDE"; break;
+        case TOKEN_GREATER_THAN: token_name = "GREATER_THAN"; break;
+        case TOKEN_LOWER_THAN: token_name = "LOWER_THAN"; break;
+        case TOKEN_ASSIGN: token_name = "ASSIGN"; break;
+        case TOKEN_LOWER_OR_EQUAL: token_name = "LOWER_OR_EQUAL"; break;
+        case TOKEN_GREATER_OR_EQUAL: token_name = "GREATER_OR_EQUAL"; break;
+        case TOKEN_OPEN_PARENTHESIS: token_name = "OPEN_PARENTHESIS"; break;
+        case TOKEN_CLOSE_PARENTHESIS: token_name = "CLOSE_PARENTHESIS"; break;
+        case TOKEN_QUOTE: token_name = "QUOTE"; break;
         default: token_name = "UNRECOGNIZED"; break;
     }
 
@@ -105,10 +129,6 @@ string      \"(\\.|[^"\\])*\"
 boolean     "true" | "false"
 type        ("int"|"float"|"string"|"boolean")
 comment     \#[^\n]*
-
-operation   [+\-*/]
-comparison  "<<|>>|>>=|<<="
-expression "("({ID}|{int}|{float}|{operation}|{comparison}|[ \t])*")"
 
 %%
 
@@ -153,13 +173,27 @@ expression "("({ID}|{int}|{float}|{operation}|{comparison}|[ \t])*")"
 "</string>"         { current_token = TOKEN_VAR_STRING_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 
 
-"="({expression}|{string}) { current_token = TOKEN_ATTRIBUTE_VALUE; token_action(current_token, yytext, output_file); return current_token; }
-{expression}          { current_token = TOKEN_EXPRESSION; token_action(current_token, yytext, output_file); return current_token; }
-{string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file); return current_token; }
+"+"                   { current_token = TOKEN_PLUS; token_action(current_token, yytext, output_file) ; return current_token; }
+"-"                   { current_token = TOKEN_MINUS; token_action(current_token, yytext, output_file); return current_token; }
+"*"                   { current_token = TOKEN_MULTIPLY; token_action(current_token, yytext, output_file); return current_token; }
+"/"                   { current_token = TOKEN_DIVIDE; token_action(current_token, yytext, output_file); return current_token; }
+">>"                  { current_token = TOKEN_GREATER_THAN; token_action(current_token, yytext, output_file); return current_token; }
+"<<"                  { current_token = TOKEN_LOWER_THAN; token_action(current_token, yytext, output_file); return current_token; }
+"=="                  { current_token = TOKEN_ASSIGN; token_action(current_token, yytext, output_file); return current_token; }
+"<<="                 { current_token = TOKEN_LOWER_OR_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
+">>="                 { current_token = TOKEN_GREATER_OR_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
+"("                   { current_token = TOKEN_OPEN_PARENTHESIS; token_action(current_token, yytext, output_file); return current_token; }
+")"                   { current_token = TOKEN_CLOSE_PARENTHESIS; token_action(current_token, yytext, output_file); return current_token; }
+
+"="                   { current_token = TOKEN_ATTRIBUTE_VALUE; token_action(current_token, yytext, output_file); return current_token; }
+"\""                  { current_token = TOKEN_QUOTE; token_action(current_token, yytext, output_file); return current_token; }
+
 {ID}                  { current_token = TOKEN_ATTRIBUTE_NAME; token_action(current_token, yytext, output_file); return current_token; }
 
 "/>"                  { current_token = TOKEN_SELF_CLOSING_TAG; token_action(current_token, yytext, output_file); return current_token; }
 ">"                   { current_token = TOKEN_END_TAG; token_action(current_token, yytext, output_file); return current_token; }
+
+{string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file); return current_token; }
 
 .                     { current_token = TOKEN_UNRECOGNIZED; token_action(current_token, yytext, output_file); return current_token; }
 
