@@ -20,6 +20,7 @@ enum TokenType {
     TOKEN_PRINT_CLOSE,
     TOKEN_IF_OPEN,
     TOKEN_IF_CLOSE,
+    TOKEN_CONDITION_DECLARATION,
     TOKEN_ELSE,
     TOKEN_VAR_INT_OPEN,
     TOKEN_VAR_INT_CLOSE,
@@ -35,6 +36,7 @@ enum TokenType {
     TOKEN_ATTRIBUTE_NAME,
     TOKEN_SELF_CLOSING_TAG,
     TOKEN_END_TAG,
+    TOKEN_NUMBER,
     TOKEN_WHILE_CLOSE,
     TOKEN_WHILE_OPEN,
     TOKEN_ARRAY_CLOSE,
@@ -106,6 +108,8 @@ void token_action(int token, char* text, FILE* output_file) {
         case TOKEN_OPEN_PARENTHESIS: token_name = "OPEN_PARENTHESIS"; break;
         case TOKEN_CLOSE_PARENTHESIS: token_name = "CLOSE_PARENTHESIS"; break;
         case TOKEN_QUOTE: token_name = "QUOTE"; break;
+        case TOKEN_NUMBER: token_name = "NUMBER"; break;
+        case TOKEN_CONDITION_DECLARATION: token_name = "CONDITION_DECLARATION"; break;
         default: token_name = "UNRECOGNIZED"; break;
     }
 
@@ -149,6 +153,7 @@ comment     \#[^\n]*
 "</print>"            { current_token = TOKEN_PRINT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 "<if"                 { current_token = TOKEN_IF_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 "</if>"               { current_token = TOKEN_IF_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
+"condition="          { current_token = TOKEN_CONDITION_DECLARATION; token_action(current_token, yytext, output_file); return current_token; }
 "<else>"              { current_token = TOKEN_ELSE; token_action(current_token, yytext, output_file); return current_token; }
 "<while"              { current_token = TOKEN_WHILE_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 "</while>"            { current_token = TOKEN_WHILE_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
@@ -194,6 +199,8 @@ comment     \#[^\n]*
 ">"                   { current_token = TOKEN_END_TAG; token_action(current_token, yytext, output_file); return current_token; }
 
 {string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file); return current_token; }
+
+{int}                 { current_token = TOKEN_NUMBER; token_action(current_token, yytext, output_file); return current_token; }
 
 .                     { current_token = TOKEN_UNRECOGNIZED; token_action(current_token, yytext, output_file); return current_token; }
 
