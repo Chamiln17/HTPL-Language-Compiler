@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define OUTPUT_METHOD "FILE" // FILE or CONSOLE
+#define OUTPUTFILE "lexical-lexemes" // Output file name
+
 // Define token types
 enum TokenType {
     TOKEN_PROGRAM_OPEN = 1,
@@ -164,8 +167,6 @@ expression "("({ID}|{int}|{float}|{operation}|{comparison}|[ \t])*")"
 
 int main(int argc, char **argv) {
     
-
-
     // Open input file if provided
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
@@ -176,11 +177,13 @@ int main(int argc, char **argv) {
     }
 
     // Open output file once at the start
-    output_file = fopen("lexical-lexemes", "w");
-    if (!output_file) {
-        fprintf(stderr, "Cannot create output file lexical-lexemes\n");
-        if (argc > 1) fclose(yyin);
-        return 1;
+    if (OUTPUT_METHOD == "FILE"){
+        output_file = fopen(OUTPUTFILE, "w");
+        if (!output_file) {
+            fprintf(stderr, "Cannot create output file lexical-lexemes\n");
+            if (argc > 1) fclose(yyin);
+            return 1;
+        }
     }
 
     printf("Starting lexical analysis:\n");
@@ -192,7 +195,9 @@ int main(int argc, char **argv) {
         fclose(yyin);
     }
 
-    fclose(output_file);
+    if (output_file) {  // Only close if we actually opened it
+        fclose(output_file);
+    }
 
     printf("Lexical analysis complete.\n");
     return 0;

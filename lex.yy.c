@@ -598,6 +598,9 @@ char *yytext;
 #include <stdlib.h>
 #include <string.h>
 
+#define OUTPUT_METHOD "FILE" // FILE or CONSOLE
+#define OUTPUTFILE "lexical-lexemes" // Output file name
+
 // Define token types
 enum TokenType {
     TOKEN_PROGRAM_OPEN = 1,
@@ -685,8 +688,8 @@ void token_action(int token, char* text, FILE* output_file) {
     }
 }
 
-#line 689 "lex.yy.c"
-#line 690 "lex.yy.c"
+#line 692 "lex.yy.c"
+#line 693 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -903,12 +906,12 @@ YY_DECL
 		}
 
 	{
-#line 110 "htpl_lexer.l"
+#line 113 "htpl_lexer.l"
 
 
 
 
-#line 912 "lex.yy.c"
+#line 915 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -968,187 +971,187 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 114 "htpl_lexer.l"
+#line 117 "htpl_lexer.l"
 { /* Ignore spaces, tabs, and newlines */ }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 115 "htpl_lexer.l"
+#line 118 "htpl_lexer.l"
 { /* Ignore comments */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 117 "htpl_lexer.l"
+#line 120 "htpl_lexer.l"
 { current_token = TOKEN_PROGRAM_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 118 "htpl_lexer.l"
+#line 121 "htpl_lexer.l"
 { current_token = TOKEN_PROGRAM_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 119 "htpl_lexer.l"
+#line 122 "htpl_lexer.l"
 { current_token = TOKEN_VARIABLES_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 120 "htpl_lexer.l"
+#line 123 "htpl_lexer.l"
 { current_token = TOKEN_VARIABLES_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 121 "htpl_lexer.l"
+#line 124 "htpl_lexer.l"
 { current_token = TOKEN_INSTRUCTIONS_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 122 "htpl_lexer.l"
+#line 125 "htpl_lexer.l"
 { current_token = TOKEN_INSTRUCTIONS_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 123 "htpl_lexer.l"
+#line 126 "htpl_lexer.l"
 { current_token = TOKEN_ASSIGN_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 124 "htpl_lexer.l"
+#line 127 "htpl_lexer.l"
 { current_token = TOKEN_ASSIGN_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 125 "htpl_lexer.l"
+#line 128 "htpl_lexer.l"
 { current_token = TOKEN_PRINT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 126 "htpl_lexer.l"
+#line 129 "htpl_lexer.l"
 { current_token = TOKEN_PRINT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 127 "htpl_lexer.l"
+#line 130 "htpl_lexer.l"
 { current_token = TOKEN_IF_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 128 "htpl_lexer.l"
+#line 131 "htpl_lexer.l"
 { current_token = TOKEN_IF_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 129 "htpl_lexer.l"
+#line 132 "htpl_lexer.l"
 { current_token = TOKEN_ELSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 130 "htpl_lexer.l"
+#line 133 "htpl_lexer.l"
 { current_token = TOKEN_WHILE_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 131 "htpl_lexer.l"
+#line 134 "htpl_lexer.l"
 { current_token = TOKEN_WHILE_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 132 "htpl_lexer.l"
+#line 135 "htpl_lexer.l"
 { current_token = TOKEN_ARRAY_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 133 "htpl_lexer.l"
+#line 136 "htpl_lexer.l"
 { current_token = TOKEN_ARRAY_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 134 "htpl_lexer.l"
+#line 137 "htpl_lexer.l"
 { current_token = TOKEN_ELEMENT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 137 "htpl_lexer.l"
+#line 140 "htpl_lexer.l"
 { current_token = TOKEN_VAR_INT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 138 "htpl_lexer.l"
+#line 141 "htpl_lexer.l"
 { current_token = TOKEN_VAR_INT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 141 "htpl_lexer.l"
+#line 144 "htpl_lexer.l"
 { current_token = TOKEN_VAR_FLOAT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 142 "htpl_lexer.l"
+#line 145 "htpl_lexer.l"
 { current_token = TOKEN_VAR_FLOAT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 145 "htpl_lexer.l"
+#line 148 "htpl_lexer.l"
 { current_token = TOKEN_VAR_BOOLEAN_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 146 "htpl_lexer.l"
+#line 149 "htpl_lexer.l"
 { current_token = TOKEN_VAR_BOOLEAN_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 149 "htpl_lexer.l"
+#line 152 "htpl_lexer.l"
 { current_token = TOKEN_VAR_STRING_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 150 "htpl_lexer.l"
+#line 153 "htpl_lexer.l"
 { current_token = TOKEN_VAR_STRING_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 153 "htpl_lexer.l"
+#line 156 "htpl_lexer.l"
 { current_token = TOKEN_ATTRIBUTE_VALUE; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 154 "htpl_lexer.l"
+#line 157 "htpl_lexer.l"
 { current_token = TOKEN_EXPRESSION; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 155 "htpl_lexer.l"
+#line 158 "htpl_lexer.l"
 { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 156 "htpl_lexer.l"
+#line 159 "htpl_lexer.l"
 { current_token = TOKEN_ATTRIBUTE_NAME; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 158 "htpl_lexer.l"
+#line 161 "htpl_lexer.l"
 { current_token = TOKEN_SELF_CLOSING_TAG; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 159 "htpl_lexer.l"
+#line 162 "htpl_lexer.l"
 { current_token = TOKEN_END_TAG; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 161 "htpl_lexer.l"
+#line 164 "htpl_lexer.l"
 { current_token = TOKEN_UNRECOGNIZED; token_action(current_token, yytext, output_file); return current_token; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 163 "htpl_lexer.l"
+#line 166 "htpl_lexer.l"
 ECHO;
 	YY_BREAK
-#line 1152 "lex.yy.c"
+#line 1155 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2153,13 +2156,11 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 163 "htpl_lexer.l"
+#line 166 "htpl_lexer.l"
 
 
 int main(int argc, char **argv) {
     
-
-
     // Open input file if provided
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
@@ -2170,11 +2171,13 @@ int main(int argc, char **argv) {
     }
 
     // Open output file once at the start
-    output_file = fopen("lexical-lexemes", "w");
-    if (!output_file) {
-        fprintf(stderr, "Cannot create output file lexical-lexemes\n");
-        if (argc > 1) fclose(yyin);
-        return 1;
+    if (OUTPUT_METHOD == "FILE"){
+        output_file = fopen(OUTPUTFILE, "w");
+        if (!output_file) {
+            fprintf(stderr, "Cannot create output file lexical-lexemes\n");
+            if (argc > 1) fclose(yyin);
+            return 1;
+        }
     }
 
     printf("Starting lexical analysis:\n");
@@ -2186,7 +2189,9 @@ int main(int argc, char **argv) {
         fclose(yyin);
     }
 
-    fclose(output_file);
+    if (output_file) {  // Only close if we actually opened it
+        fclose(output_file);
+    }
 
     printf("Lexical analysis complete.\n");
     return 0;
