@@ -20,7 +20,6 @@ enum TokenType {
     TOKEN_PRINT_CLOSE,
     TOKEN_IF_OPEN,
     TOKEN_IF_CLOSE,
-    TOKEN_CONDITION_DECLARATION,
     TOKEN_ELSE,
     TOKEN_VAR_INT_OPEN,
     TOKEN_VAR_INT_CLOSE,
@@ -30,13 +29,11 @@ enum TokenType {
     TOKEN_VAR_BOOLEAN_CLOSE,
     TOKEN_VAR_STRING_OPEN,
     TOKEN_VAR_STRING_CLOSE,
-    TOKEN_ATTRIBUTE_VALUE,
     TOKEN_EXPRESSION,
     TOKEN_STRING,
     TOKEN_ATTRIBUTE_NAME,
     TOKEN_SELF_CLOSING_TAG,
     TOKEN_END_TAG,
-    TOKEN_NUMBER,
     TOKEN_WHILE_CLOSE,
     TOKEN_WHILE_OPEN,
     TOKEN_ARRAY_CLOSE,
@@ -54,7 +51,12 @@ enum TokenType {
     TOKEN_GREATER_OR_EQUAL,
     TOKEN_OPEN_PARENTHESIS,
     TOKEN_CLOSE_PARENTHESIS,
-    TOKEN_QUOTE
+    TOKEN_QUOTE,
+    TOKEN_EQUAL,
+    IDENTIFICATEUR,
+    TOKEN_FLOAT,
+    TOKEN_INT,
+    TOKEN_BOOLEAN
 };
 
 // Global variable to hold the current token type
@@ -85,7 +87,6 @@ void token_action(int token, char* text, FILE* output_file) {
         case TOKEN_VAR_BOOLEAN_CLOSE: token_name = "VAR_BOOLEAN_CLOSE"; break;
         case TOKEN_VAR_STRING_OPEN: token_name = "VAR_STRING_OPEN"; break;
         case TOKEN_VAR_STRING_CLOSE: token_name = "VAR_STRING_CLOSE"; break;
-        case TOKEN_ATTRIBUTE_VALUE: token_name = "ATTRIBUTE_VALUE"; break;
         case TOKEN_EXPRESSION: token_name = "EXPRESSION"; break;
         case TOKEN_STRING: token_name = "STRING"; break;
         case TOKEN_ATTRIBUTE_NAME: token_name = "ATTRIBUTE_NAME"; break;
@@ -108,13 +109,17 @@ void token_action(int token, char* text, FILE* output_file) {
         case TOKEN_OPEN_PARENTHESIS: token_name = "OPEN_PARENTHESIS"; break;
         case TOKEN_CLOSE_PARENTHESIS: token_name = "CLOSE_PARENTHESIS"; break;
         case TOKEN_QUOTE: token_name = "QUOTE"; break;
-        case TOKEN_NUMBER: token_name = "NUMBER"; break;
-        case TOKEN_CONDITION_DECLARATION: token_name = "CONDITION_DECLARATION"; break;
+        case TOKEN_EQUAL: token_name = "EQUAL"; break;
+        case IDENTIFICATEUR: token_name = "IDENTIFICATEUR"; break;
+        case TOKEN_INT: token_name = "TOKEN_INT"; break;
+        case TOKEN_FLOAT: token_name = "TOKEN_FLOAT"; break;
+        case TOKEN_BOOLEAN: token_name = "TOKEN_BOOLEAN"; break;
+
         default: token_name = "UNRECOGNIZED"; break;
     }
 
     if (output_file) {
-        fprintf(output_file, "%s ", token_name);
+        fprintf(output_file, "%s , %s \n", token_name , text);
     }
     else {
         printf("Token: %d, Content: %s\n", token, text);
@@ -130,7 +135,7 @@ ID          [a-zA-Z_][a-zA-Z0-9_]*
 int         {chiffre}+
 float       {int}"."{int}
 string      \"(\\.|[^"\\])*\"
-boolean     "true" | "false"
+boolean     "true"|"false"
 type        ("int"|"float"|"string"|"boolean")
 comment     \#[^\n]*
 
@@ -153,7 +158,6 @@ comment     \#[^\n]*
 "</print>"            { current_token = TOKEN_PRINT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
 "<if"                 { current_token = TOKEN_IF_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 "</if>"               { current_token = TOKEN_IF_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"condition="          { current_token = TOKEN_CONDITION_DECLARATION; token_action(current_token, yytext, output_file); return current_token; }
 "<else>"              { current_token = TOKEN_ELSE; token_action(current_token, yytext, output_file); return current_token; }
 "<while"              { current_token = TOKEN_WHILE_OPEN; token_action(current_token, yytext, output_file); return current_token; }
 "</while>"            { current_token = TOKEN_WHILE_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
@@ -184,23 +188,25 @@ comment     \#[^\n]*
 "/"                   { current_token = TOKEN_DIVIDE; token_action(current_token, yytext, output_file); return current_token; }
 ">>"                  { current_token = TOKEN_GREATER_THAN; token_action(current_token, yytext, output_file); return current_token; }
 "<<"                  { current_token = TOKEN_LOWER_THAN; token_action(current_token, yytext, output_file); return current_token; }
-"=="                  { current_token = TOKEN_ASSIGN; token_action(current_token, yytext, output_file); return current_token; }
+"=="                  { current_token = TOKEN_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
 "<<="                 { current_token = TOKEN_LOWER_OR_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
 ">>="                 { current_token = TOKEN_GREATER_OR_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
 "("                   { current_token = TOKEN_OPEN_PARENTHESIS; token_action(current_token, yytext, output_file); return current_token; }
 ")"                   { current_token = TOKEN_CLOSE_PARENTHESIS; token_action(current_token, yytext, output_file); return current_token; }
 
-"="                   { current_token = TOKEN_ATTRIBUTE_VALUE; token_action(current_token, yytext, output_file); return current_token; }
+"="                   { current_token = TOKEN_ASSIGN; token_action(current_token, yytext, output_file); return current_token; }
 "\""                  { current_token = TOKEN_QUOTE; token_action(current_token, yytext, output_file); return current_token; }
 
-{ID}                  { current_token = TOKEN_ATTRIBUTE_NAME; token_action(current_token, yytext, output_file); return current_token; }
+{float}              { current_token = TOKEN_FLOAT; token_action(current_token, yytext, output_file); return current_token; }
+{int}                { current_token = TOKEN_INT; token_action(current_token, yytext, output_file); return current_token; }
+{boolean}            { current_token = TOKEN_BOOLEAN; token_action(current_token, yytext, output_file); return current_token; }
+
+{ID}                  { current_token = IDENTIFICATEUR; token_action(current_token, yytext, output_file); return current_token; }
 
 "/>"                  { current_token = TOKEN_SELF_CLOSING_TAG; token_action(current_token, yytext, output_file); return current_token; }
 ">"                   { current_token = TOKEN_END_TAG; token_action(current_token, yytext, output_file); return current_token; }
 
 {string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file); return current_token; }
-
-{int}                 { current_token = TOKEN_NUMBER; token_action(current_token, yytext, output_file); return current_token; }
 
 .                     { current_token = TOKEN_UNRECOGNIZED; token_action(current_token, yytext, output_file); return current_token; }
 
@@ -238,125 +244,6 @@ int main(int argc, char **argv) {
 
     if (output_file) {  // Only close if we actually opened it
         fclose(output_file);
-    }
-
-    printf("Lexical analysis complete.\n");
-    return 0;
-}
-
-%{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// Define token types
-enum TokenType {
-    TOKEN_PROGRAM_OPEN = 1,
-    TOKEN_PROGRAM_CLOSE,
-    TOKEN_VARIABLES_OPEN,
-    TOKEN_VARIABLES_CLOSE,
-    TOKEN_INSTRUCTIONS_OPEN,
-    TOKEN_INSTRUCTIONS_CLOSE,
-    TOKEN_ASSIGN_OPEN,
-    TOKEN_ASSIGN_CLOSE,
-    TOKEN_PRINT_OPEN,
-    TOKEN_PRINT_CLOSE,
-    TOKEN_IF_OPEN,
-    TOKEN_IF_CLOSE,
-    TOKEN_ELSE,
-    TOKEN_VAR_OPEN,
-    TOKEN_VAR_CLOSE,
-    TOKEN_ATTRIBUTE_VALUE,
-    TOKEN_EXPRESSION,
-    TOKEN_STRING,
-    TOKEN_ATTRIBUTE_NAME,
-    TOKEN_SELF_CLOSING_TAG,
-    TOKEN_END_TAG,
-    TOKEN_WHILE_CLOSE,
-    TOKEN_WHILE_OPEN,
-    TOKEN_ARRAY_CLOSE,
-    TOKEN_ARRAY_OPEN,
-    TOKEN_ELEMENT_OPEN,
-    TOKEN_UNRECOGNIZED
-};
-
-// Global variable to hold the current token type
-int current_token;
-
-%}
-
-%option noyywrap
-
-chiffre     [0-9]
-ID          [a-zA-Z_][a-zA-Z0-9_]* 
-int         {chiffre}+
-float       {int}"."{int}
-string      \"(\\.|[^"\\])*\"
-boolean     "true" | "false"
-type        ("int"|"float"|"string"|"boolean")
-comment     \#[^\n]*
-
-operation   [+\-*/]
-comparison  "<<|>>|>>=|<<="
-expression "("({ID}|{int}|{float}|{operation}|{comparison}|[ \t])*")"
-
-%%
-
-[ \t\n]+              { /* Ignore spaces, tabs, and newlines */ }
-{comment}             { /* Ignore comments */ }
-
-"<program"            { current_token = TOKEN_PROGRAM_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</program>"          { current_token = TOKEN_PROGRAM_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<variables>"         { current_token = TOKEN_VARIABLES_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</variables>"        { current_token = TOKEN_VARIABLES_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<instructions>"      { current_token = TOKEN_INSTRUCTIONS_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</instructions>"     { current_token = TOKEN_INSTRUCTIONS_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<assign"             { current_token = TOKEN_ASSIGN_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</assign>"           { current_token = TOKEN_ASSIGN_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<print"              { current_token = TOKEN_PRINT_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</print>"            { current_token = TOKEN_PRINT_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<if"                 { current_token = TOKEN_IF_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</if>"               { current_token = TOKEN_IF_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<else>"              { current_token = TOKEN_ELSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<while"              { current_token = TOKEN_WHILE_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</while>"            { current_token = TOKEN_WHILE_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<array"            { current_token = TOKEN_ARRAY_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</array>"            { current_token = TOKEN_ARRAY_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"<element"            { current_token = TOKEN_ELEMENT_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-
-
-"<"{type}             { current_token = TOKEN_VAR_OPEN; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-"</"{type}">"         { current_token = TOKEN_VAR_CLOSE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-
-"="({expression}|{string}) { current_token = TOKEN_ATTRIBUTE_VALUE; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-{expression}          { current_token = TOKEN_EXPRESSION; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-{string}              { current_token = TOKEN_STRING; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-{ID}                  { current_token = TOKEN_ATTRIBUTE_NAME; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-
-"/>"                  { current_token = TOKEN_SELF_CLOSING_TAG; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-">"                   { current_token = TOKEN_END_TAG; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-
-.                     { current_token = TOKEN_UNRECOGNIZED; printf("Token: %d, Content: %s\n", current_token, yytext); return current_token; }
-
-%%
-
-int main(int argc, char **argv) {
-    // Open input file if provided
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        if (!yyin) {
-            fprintf(stderr, "Cannot open file %s\n", argv[1]);
-            return 1;
-        }
-    }
-
-    printf("Starting lexical analysis:\n");
-    while (yylex() != 0) {
-        // Token processing happens inside yylex
-    }
-
-    if (argc > 1) {
-        fclose(yyin);
     }
 
     printf("Lexical analysis complete.\n");
