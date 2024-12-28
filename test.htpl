@@ -1,17 +1,3 @@
-<program name="SumCalculator">
-    <variables>
-        <int name="a">(22)</int>
-        <int name="b">(20)</int>
-        <int name="sum">(0)</int>
-    </variables>
-    <instructions>
+<if condition=(x >> 0)>
         <assign sum=(a + b)/>
-        <print value="La somme de a et b est :"/>
-        <print value=(sum)/>
-        
-        <while condition=(true)>
-            <print value="hello there" />
-            <print value=(a+b) />
-        </while>
-    </instructions>
-</program>
+</if>
