@@ -1,0 +1,23 @@
+
+******************************************************************************Commands************************************************
+
+
+
+>bison -d comp.y
+                        >mv comp.tab.h comp.h
+                        >mv comp.tab.c comp.y.c
+>flex comp.lex
+                        >mv lex.yy.c comp.lex.c	
+
+                        gcc -o flexbisontest comp.y.c comp.lex.c -lfl -lm       (avec renom)
+
+gcc -o flexbisontest comp.tab.c lex.yy.c -lfl -lm		
+
+
+
+
+
+-L'option -d permet de créer le fichier comp.tab.h qui définit les terminaux (tokens).
+
+-("-lm") to link Math library
+
