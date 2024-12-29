@@ -3,14 +3,45 @@
 #include <string.h>
 #include <stdbool.h>
 
-// --------------------------------------------------------------------
-// Variables globales ou statiques pour la simplicité de la démonstration
-// --------------------------------------------------------------------
-static char* input;  // pointeur sur la chaîne d'entrée
-static int indexInput = 0; // position courante dans la chaîne
-static char tc;            // caractère (token) courant
-static long fileSize;     // taille du fichier
+#define MAX_TOKEN_LENGTH 256
 
+// OPTINISATION : Utilisation d'une énumération pour les types de token pour eviter comparaison de chaines
+typedef enum {
+    TOKEN_VARIABLES_OPEN,
+    TOKEN_VARIABLES_CLOSE,
+    TOKEN_VAR_STRING_OPEN,
+    TOKEN_VAR_STRING_CLOSE,
+    TOKEN_END_TAG,
+    TOKEN_SELF_CLOSING_TAG,
+    TOKEN_ATTRIBUTE_NAME,
+    TOKEN_ASSIGN,
+    TOKEN_STRING,
+    TOKEN_EOF,
+    TOKEN_DIAZ,
+} TokenType;
+
+// Structure pour représenter un token
+typedef struct {
+    TokenType type;
+    char value[MAX_TOKEN_LENGTH];
+} Token;
+
+// Variables globales ou statiques pour la simplicité de la démonstration
+
+// Pointeur sur la chaîne d'entrée
+static char* input;
+
+// Position courante dans la chaîne
+static int indexInput = 0;
+
+// Token courant
+static Token currentToken;
+
+// Taille du fichier
+static long fileSize;
+
+// Fichier d'erreurs
+FILE* err_file;
 
 // --------------------------------------------------------------------
 // Fonction pour lire le fichier
@@ -68,128 +99,212 @@ void writeResult(const char* filename, bool success, const char* message) {
 }
 
 // --------------------------------------------------------------------
-// nextToken : lit le prochain caractère de l'entrée
-// --------------------------------------------------------------------
-void nextToken(void) {
-    tc = input[indexInput];
-    if (tc != '\0') {
-        indexInput++;
-    }
-}
-
-// --------------------------------------------------------------------
-// error : en cas d'erreur on affiche un message et on stoppe le programme
+// Fonction pour afficher une erreur et quitter
 // --------------------------------------------------------------------
 void error(const char* message) {
-    fprintf(stderr, "Erreur de syntaxe: %s\n", message);
+    if (err_file) {
+        fprintf(err_file, "ERREUR SYNTAXIQUE: %s\n", message);
+        fclose(err_file);
+    }
+    free(input);
     exit(EXIT_FAILURE);
 }
 
 // --------------------------------------------------------------------
-// Z -> S #
+// Fonction pour lire le prochain token (Equivalent de ts)
 // --------------------------------------------------------------------
+void nextToken(void) {
+    // Ignorer les espaces
+    while (input[indexInput] == ' ' || input[indexInput] == '\n' || input[indexInput] == '\t') {
+        indexInput++;
+    }
+
+    // Fin de la chaîne
+    if (input[indexInput] == '\0') {
+        currentToken.type = TOKEN_EOF;
+        return;
+    }
+
+    // Buffer pour stocker le token
+    char tokenBuffer[MAX_TOKEN_LENGTH] = {0};
+    int bufferIndex = 0;
+
+    // Lire jusqu'au prochain espace ou fin de fichier
+    while (input[indexInput] != ' ' && input[indexInput] != '\n' && 
+           input[indexInput] != '\t' && input[indexInput] != '\0' && 
+           bufferIndex < MAX_TOKEN_LENGTH - 1) {
+        tokenBuffer[bufferIndex++] = input[indexInput++];
+    }
+    tokenBuffer[bufferIndex] = '\0';
+
+    // Déterminer un type au token
+    if (strcmp(tokenBuffer, "TOKEN_VARIABLES_OPEN") == 0)
+        currentToken.type = TOKEN_VARIABLES_OPEN;
+    else if (strcmp(tokenBuffer, "TOKEN_VARIABLES_CLOSE") == 0)
+        currentToken.type = TOKEN_VARIABLES_CLOSE;
+    else if (strcmp(tokenBuffer, "TOKEN_VAR_STRING_OPEN") == 0)
+        currentToken.type = TOKEN_VAR_STRING_OPEN;
+    else if (strcmp(tokenBuffer, "TOKEN_VAR_STRING_CLOSE") == 0)
+        currentToken.type = TOKEN_VAR_STRING_CLOSE;
+    else if (strcmp(tokenBuffer, "TOKEN_END_TAG") == 0)
+        currentToken.type = TOKEN_END_TAG;
+    else if (strcmp(tokenBuffer, "TOKEN_SELF_CLOSING_TAG") == 0)
+        currentToken.type = TOKEN_SELF_CLOSING_TAG;
+    else if (strcmp(tokenBuffer, "TOKEN_ATTRIBUTE_NAME") == 0)
+        currentToken.type = TOKEN_ATTRIBUTE_NAME;
+    else if (strcmp(tokenBuffer, "TOKEN_ASSIGN") == 0)
+        currentToken.type = TOKEN_ASSIGN;
+    else if (strcmp(tokenBuffer, "TOKEN_STRING") == 0)
+        currentToken.type = TOKEN_STRING;
+    else if (strcmp(tokenBuffer, "#") == 0)
+        currentToken.type = TOKEN_DIAZ;
+    else if (strcmp(tokenBuffer, "UNRECOGNIZED") == 0)
+        error("Token non reconnu");
+    else
+        currentToken.type = TOKEN_EOF;
+
+    strcpy(currentToken.value, tokenBuffer);
+}
+
+
+
+// Déclarations des fonctions pour les procédures
 void Z(void);
-
-// --------------------------------------------------------------------
-// S -> a A b | ε
-// --------------------------------------------------------------------
-void S(void);
-
-// --------------------------------------------------------------------
-// A -> c A | a b
-// --------------------------------------------------------------------
+void V(void);
+void E(void);
+void E1(void);
 void A(void);
 
 // ====================================================================
 // Implémentation des procédures
 // ====================================================================
 
-// Z -> S #
-void Z(void) {
-    // On appelle d'abord S
-    S();
 
-    // Puis on s'attend à lire le symbole '#'
-    if (tc == '#') {
-        printf("Chaine syntaxiquement correcte\n");
-    } else {
+// --------------------------------------------------------------------
+// <Z> ::= <V> # EOF
+// --------------------------------------------------------------------
+void Z(void) {
+    V();
+    if (currentToken.type != TOKEN_DIAZ) {
         error("Symbole '#' attendu à la fin");
     }
-}
-
-// S -> a A b | ε
-void S(void) {
-    if (tc == 'a') {
-        // On consomme 'a'
-        nextToken();   // tc = 'a' lu, on avance
-
-        // On appelle A
-        A();
-
-        // On s'attend à lire 'b'
-        if (tc == 'b') {
-            nextToken(); // consomme 'b'
-        } else {
-            error("'b' attendu après A");
-        }
-    }
-    else {
-        // Ici, la production S -> ε
-        // On ne fait rien, MAIS on doit vérifier
-        // que le symbole courant est bien dans FOLLOW(S) (= '#' ou éventuellement 'b')
-        // D'après l’exemple, FOLLOW(S) = {#, b}.
-        // Donc si tc n'est ni '#' ni 'b', c'est une erreur.
-        if (tc != '#' && tc != 'b') {
-            error("Ni 'a', ni symbole de FOLLOW(S) pour dériver epsilon");
-        }
-        // Sinon, on laisse passer (epsilon)
+    nextToken();
+    if (currentToken.type != TOKEN_EOF) {
+        error("Caractères supplémentaires après '#'");
     }
 }
 
-// A -> c A | a b
+// --------------------------------------------------------------------
+// <V> ::= TOKEN_VARIABLES_OPEN <E> TOKEN_VARIABLES_CLOSE | ε 
+// --------------------------------------------------------------------
+void V(void) {
+    if (currentToken.type == TOKEN_VARIABLES_OPEN) {
+        nextToken();
+        E();
+        if (currentToken.type != TOKEN_VARIABLES_CLOSE) {
+            error("Token TOKEN_VARIABLES_CLOSE attendu");
+        }
+        nextToken();
+    }
+    // ε case - ne rien faire
+}
+
+// --------------------------------------------------------------------
+// <E> ::= TOKEN_VAR_STRING_OPEN <A> TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE <E1> | TOKEN_VAR_STRING_OPEN <A> TOKEN_SELF_CLOSING_TAG <E1>
+// --------------------------------------------------------------------
+void E(void) {
+    if (currentToken.type != TOKEN_VAR_STRING_OPEN) {
+        error("TOKEN_VAR_STRING_OPEN attendu");
+    }
+
+    nextToken();
+    A();
+
+    if (currentToken.type == TOKEN_END_TAG) {
+        nextToken();
+        if (currentToken.type != TOKEN_STRING) {
+            error("TOKEN_STRING attendu après TOKEN_END_TAG");
+        }
+        nextToken();
+        if (currentToken.type != TOKEN_VAR_STRING_CLOSE) {
+            error("TOKEN_VAR_STRING_CLOSE attendu");
+        }
+        nextToken();
+        E1();
+    } else if (currentToken.type == TOKEN_SELF_CLOSING_TAG) {
+        nextToken();
+        E1();
+    } else {
+        error("TOKEN_END_TAG ou TOKEN_SELF_CLOSING_TAG attendu");
+    }
+}
+
+// --------------------------------------------------------------------
+// <E1> ::= <E> | ε
+// --------------------------------------------------------------------
+void E1(void) {
+    if (currentToken.type == TOKEN_VAR_STRING_OPEN) {
+        E();
+    }
+    // ε case - ne rien faire
+}
+
+// --------------------------------------------------------------------
+// <A> ::= TOKEN_ATTRIBUTE_NAME TOKEN_ASSIGN TOKEN_STRING
+// --------------------------------------------------------------------
 void A(void) {
-    if (tc == 'c') {
-        // On consomme 'c'
-        nextToken();
+    if (currentToken.type != TOKEN_ATTRIBUTE_NAME) {
+        error("TOKEN_ATTRIBUTE_NAME attendu");
+    }
+    nextToken();
 
-        // Appel récursif de A
-        A();
+    if (currentToken.type != TOKEN_ASSIGN) {
+        error("TOKEN_ASSIGN attendu");
     }
-    else if (tc == 'a') {
-        // On consomme 'a'
-        nextToken();
+    nextToken();
 
-        // On s'attend à lire 'b'
-        if (tc == 'b') {
-            nextToken();
-            // Fin de la production A -> a b
-        } else {
-            error("'b' attendu après 'a' pour la production A -> a b");
-        }
+    if (currentToken.type != TOKEN_STRING) {
+        error("TOKEN_STRING attendu");
     }
-    else {
-        // Ici, pas de ε pour A : c'est nécessairement une erreur
-        error("Symbole inattendu dans A");
-    }
+    nextToken();
 }
 
-// ====================================================================
-// Programme principal
-// ====================================================================
 int main(int argc, char* argv[]) {
+
+    // Vérifier les arguments (fichier d'entrée et de sortie)
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <fichier_entree> <fichier_sortie>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
+    // Ouvrir le fichier d'erreurs
+    err_file = fopen(argv[2], "w");
+    if (!err_file) {
+        fprintf(stderr, "Cannot open output file %s\n", argv[2]);
+        return EXIT_FAILURE;
+    }
+
+    // Lire le fichier d'entrée
     input = readFile(argv[1]);
+
+    // Initialiser l'analyseur lexical
     indexInput = 0;
+
+    // Lire le premier token
     nextToken();
 
-
+    // Démarrer l'analyse syntaxique
     Z();
+
+    // Écrire le résultat (Dans le cas ou il n'y a pas d'erreur)
     writeResult(argv[2], true, "Analyse syntaxique terminée avec succès");
     
+    // Libérer la mémoire et fermer les fichiers
     free(input);
+
+    // Fermer le fichier d'erreurs
+    fclose(err_file);
+
+    // Terminer le programme
     return EXIT_SUCCESS;
 }
