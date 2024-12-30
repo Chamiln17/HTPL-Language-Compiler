@@ -2,12 +2,14 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 extern int yylineno;
 extern int yyleng;
 extern int current_column;
 int yylex();
 void yyerror(const char *s);
-int current_column = 0; // Define it globally
+void yysuccess(char *s);
+int currentColumn = 1; 
 %}
 
 /* Token declarations */
@@ -42,35 +44,56 @@ int current_column = 0; // Define it globally
 
 program: 
    TOKEN_PROGRAM_OPEN 
-   TOKEN_VARIABLES_OPEN declaration_list TOKEN_VARIABLES_CLOSE 
+   variables_list
    TOKEN_INSTRUCTIONS_OPEN instruction_list TOKEN_INSTRUCTIONS_CLOSE 
    TOKEN_PROGRAM_CLOSE
    ;
 
-declaration_list:
-   declaration_list declaration 
+variables_list:
+   TOKEN_VARIABLES_OPEN declaration_list TOKEN_VARIABLES_CLOSE
    | /* empty */
-   ;
 
-declaration:
-   TOKEN_VAR_INT_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE
-   | TOKEN_VAR_FLOAT_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE 
-   | TOKEN_VAR_STRING_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE
-   | TOKEN_VAR_BOOLEAN_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE
+
+declaration_list:
+   TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE declaration_list
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE declaration_list
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE declaration_list
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE declaration_list
+   | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE declaration_list
+   | TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE 
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE
+   | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
+   | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
+   | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG
+   | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
+   
 
 attributes:
    IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING attributes
-   | /* void */
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS
    ;
+
 elements:
    element elements  | /* void */
    ;
+
 element:
-   TOKEN_ELEMENT_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS TOKEN_SELF_CLOSING_TAG
-
-
+   TOKEN_ELEMENT_OPEN attributes TOKEN_SELF_CLOSING_TAG
+   ;
 
 instruction_list:
    instruction_list instruction
@@ -85,14 +108,14 @@ instruction:
    ;
 
 assignment:
-   TOKEN_ASSIGN_OPEN IDENTIFICATEUR TOKEN_ASSIGN expr TOKEN_SELF_CLOSING_TAG
+   TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
 
 if_statement:
-   TOKEN_IF_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS TOKEN_END_TAG 
+   TOKEN_IF_OPEN attributes TOKEN_END_TAG 
    instruction_list 
    TOKEN_IF_CLOSE
-   |    TOKEN_IF_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS TOKEN_END_TAG  
+   | TOKEN_IF_OPEN attributes TOKEN_END_TAG  
    instruction_list 
    TOKEN_ELSE 
    instruction_list 
@@ -100,19 +123,13 @@ if_statement:
    ;
 
 while_statement:
-   TOKEN_WHILE_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS TOKEN_END_TAG 
+   TOKEN_WHILE_OPEN attributes TOKEN_END_TAG 
    instruction_list 
    TOKEN_WHILE_CLOSE
    ;
 
 print_statement:
-   TOKEN_PRINT_OPEN IDENTIFICATEUR TOKEN_ASSIGN expr TOKEN_SELF_CLOSING_TAG
-   ;
-
-expr:
-   expr_arithmetique
-   | expr_logique
-   | TOKEN_STRING
+   TOKEN_PRINT_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
 
 expr_arithmetique:
@@ -145,13 +162,24 @@ expr_logique:
    ;
 
 %%
-   
+
+void yysuccess(char *s){
+    currentColumn+=yyleng;
+}
+
 void yyerror(const char *s) {
-   fprintf(stderr, "File \"Test\", line %d, character %d: syntaxic error\n", 
-      yylineno, current_column-yyleng);
+    fprintf(stdout, "File output, line %d, character %d :  %s \n", yylineno, currentColumn, s);
 }
 
 int main(void) {
-   yyparse();
-   return 0;
+    
+    if (yyparse() == 0) {
+        printf("Parsing successful\n");
+    } else {
+        fprintf(stderr, "Parsing failed\n");
+        return 1;
+    }
+    return 0;
 }
+
+

@@ -7,8 +7,9 @@
 #define OUTPUT_METHOD "FILE" // FILE or CONSOLE
 #define OUTPUTFILE "lexical-lexemes" // Output file name
 
-// Define token types
-
+extern void yysuccess(char *s);
+extern void yyerror(const char *s);
+extern int currentColumn;
 
 // Global variable to hold the current token type
 int current_token;
@@ -93,72 +94,79 @@ comment     \#[^\n]*
 
 
 
-[ \t\n]+              { /* Ignore spaces, tabs, and newlines */ }
+[\n\r]+ {
+    currentColumn = 1;
+}
+
+[ \t]+ {
+    currentColumn+=yyleng;
+}
+
 {comment}             { /* Ignore comments */ }
 
-"<program>"            { current_token = TOKEN_PROGRAM_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</program>"          { current_token = TOKEN_PROGRAM_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<variables>"         { current_token = TOKEN_VARIABLES_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</variables>"        { current_token = TOKEN_VARIABLES_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<instructions>"      { current_token = TOKEN_INSTRUCTIONS_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</instructions>"     { current_token = TOKEN_INSTRUCTIONS_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<assign"             { current_token = TOKEN_ASSIGN_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</assign>"           { current_token = TOKEN_ASSIGN_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<print"              { current_token = TOKEN_PRINT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</print>"            { current_token = TOKEN_PRINT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<if"                 { current_token = TOKEN_IF_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</if>"               { current_token = TOKEN_IF_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<else>"              { current_token = TOKEN_ELSE; token_action(current_token, yytext, output_file); return current_token; }
-"<while"              { current_token = TOKEN_WHILE_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</while>"            { current_token = TOKEN_WHILE_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<array"            { current_token = TOKEN_ARRAY_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</array>"            { current_token = TOKEN_ARRAY_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
-"<element"            { current_token = TOKEN_ELEMENT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
+"<program>"            { current_token = TOKEN_PROGRAM_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext);return current_token; }
+"</program>"          { current_token = TOKEN_PROGRAM_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<variables>"         { current_token = TOKEN_VARIABLES_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</variables>"        { current_token = TOKEN_VARIABLES_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<instructions>"      { current_token = TOKEN_INSTRUCTIONS_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</instructions>"     { current_token = TOKEN_INSTRUCTIONS_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<assign"             { current_token = TOKEN_ASSIGN_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</assign>"           { current_token = TOKEN_ASSIGN_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<print"              { current_token = TOKEN_PRINT_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</print>"            { current_token = TOKEN_PRINT_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<if"                 { current_token = TOKEN_IF_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</if>"               { current_token = TOKEN_IF_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<else>"              { current_token = TOKEN_ELSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<while"              { current_token = TOKEN_WHILE_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</while>"            { current_token = TOKEN_WHILE_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<array"            { current_token = TOKEN_ARRAY_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</array>"            { current_token = TOKEN_ARRAY_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<element"            { current_token = TOKEN_ELEMENT_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
 
-"<int"             { current_token = TOKEN_VAR_INT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</int>"         { current_token = TOKEN_VAR_INT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
+"<int"             { current_token = TOKEN_VAR_INT_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</int>"         { current_token = TOKEN_VAR_INT_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
 
-"<float"             { current_token = TOKEN_VAR_FLOAT_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</float>"         { current_token = TOKEN_VAR_FLOAT_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
+"<float"             { current_token = TOKEN_VAR_FLOAT_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</float>"         { current_token = TOKEN_VAR_FLOAT_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
 
-"<boolean"             { current_token = TOKEN_VAR_BOOLEAN_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</boolean>"         { current_token = TOKEN_VAR_BOOLEAN_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
+"<boolean"             { current_token = TOKEN_VAR_BOOLEAN_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</boolean>"         { current_token = TOKEN_VAR_BOOLEAN_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
 
-"<string"             { current_token = TOKEN_VAR_STRING_OPEN; token_action(current_token, yytext, output_file); return current_token; }
-"</string>"         { current_token = TOKEN_VAR_STRING_CLOSE; token_action(current_token, yytext, output_file); return current_token; }
+"<string"             { current_token = TOKEN_VAR_STRING_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"</string>"         { current_token = TOKEN_VAR_STRING_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
 
-"+"                   { current_token = TOKEN_PLUS; token_action(current_token, yytext, output_file) ; return current_token; }
-"-"                   { current_token = TOKEN_MINUS; token_action(current_token, yytext, output_file); return current_token; }
-"*"                   { current_token = TOKEN_MULTIPLY; token_action(current_token, yytext, output_file); return current_token; }
-"/"                   { current_token = TOKEN_DIVIDE; token_action(current_token, yytext, output_file); return current_token; }
-">>"                  { current_token = TOKEN_GREATER_THAN; token_action(current_token, yytext, output_file); return current_token; }
-"<<"                  { current_token = TOKEN_LOWER_THAN; token_action(current_token, yytext, output_file); return current_token; }
-"=="                  { current_token = TOKEN_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
-"<<="                 { current_token = TOKEN_LOWER_OR_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
-">>="                 { current_token = TOKEN_GREATER_OR_EQUAL; token_action(current_token, yytext, output_file); return current_token; }
-"("                   { current_token = TOKEN_OPEN_PARENTHESIS; token_action(current_token, yytext, output_file); return current_token; }
-")"                   { current_token = TOKEN_CLOSE_PARENTHESIS; token_action(current_token, yytext, output_file); return current_token; }
+"+"                   { current_token = TOKEN_PLUS; token_action(current_token, yytext, output_file)  ; yysuccess(yytext); return current_token; }
+"-"                   { current_token = TOKEN_MINUS; token_action(current_token, yytext, output_file); yysuccess(yytext);return current_token; }
+"*"                   { current_token = TOKEN_MULTIPLY; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"/"                   { current_token = TOKEN_DIVIDE; token_action(current_token, yytext, output_file); yysuccess(yytext);return current_token; }
+">>"                  { current_token = TOKEN_GREATER_THAN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<<"                  { current_token = TOKEN_LOWER_THAN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"=="                  { current_token = TOKEN_EQUAL; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"<<="                 { current_token = TOKEN_LOWER_OR_EQUAL; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+">>="                 { current_token = TOKEN_GREATER_OR_EQUAL; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"("                   { current_token = TOKEN_OPEN_PARENTHESIS; token_action(current_token, yytext, output_file); yysuccess(yytext);return current_token; }
+")"                   { current_token = TOKEN_CLOSE_PARENTHESIS; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-"="                   { current_token = TOKEN_ASSIGN; token_action(current_token, yytext, output_file); return current_token; }
-"\""                  { current_token = TOKEN_QUOTE; token_action(current_token, yytext, output_file); return current_token; }
+"="                   { current_token = TOKEN_ASSIGN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+"\""                  { current_token = TOKEN_QUOTE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-{float}              { current_token = TOKEN_FLOAT; token_action(current_token, yytext, output_file); return current_token; }
-{int}                { current_token = TOKEN_INT; token_action(current_token, yytext, output_file); return current_token; }
-{boolean}            { current_token = TOKEN_BOOLEAN; token_action(current_token, yytext, output_file); return current_token; }
+{float}              { current_token = TOKEN_FLOAT; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+{int}                { current_token = TOKEN_INT; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+{boolean}            { current_token = TOKEN_BOOLEAN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-{ID}                  { current_token = IDENTIFICATEUR; token_action(current_token, yytext, output_file); return current_token; }
+{ID}                  { current_token = IDENTIFICATEUR; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-"/>"                  { current_token = TOKEN_SELF_CLOSING_TAG; token_action(current_token, yytext, output_file); return current_token; }
-">"                   { current_token = TOKEN_END_TAG; token_action(current_token, yytext, output_file); return current_token; }
+"/>"                  { current_token = TOKEN_SELF_CLOSING_TAG; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+">"                   { current_token = TOKEN_END_TAG; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-{string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file); return current_token; }
+{string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-.                     { current_token = TOKEN_UNRECOGNIZED; token_action(current_token, yytext, output_file); return current_token; }
+.                     { yyerror("Unexpected token"); yyterminate();}
 
 %%
 /*
