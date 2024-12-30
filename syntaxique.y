@@ -2,14 +2,43 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include "tableSymbole.h"
 extern int yylineno;
 extern int yyleng;
 extern int current_column;
 int yylex();
 void yyerror(const char *s);
+void yysuccess(char *s);
+int currentColumn = 1; 
+
+SymbolTable symbolTable;
+
+typedef struct {
+    char* name;
+    union {
+        int intVal;
+        float floatVal;
+        char* strVal;
+        bool boolVal;
+    } value;
+    DataType type;
+} AttributeValue;
+
 %}
+%union {
+    int intVal;
+    float floatVal;
+    char* strVal;
+    bool boolVal;
+    AttributeValue attr;
+}
+
+
 
 /* Token declarations */
+%token TOKEN_UNRECOGNIZED
 %token TOKEN_PROGRAM_OPEN TOKEN_PROGRAM_CLOSE
 %token TOKEN_VARIABLES_OPEN TOKEN_VARIABLES_CLOSE 
 %token TOKEN_INSTRUCTIONS_OPEN TOKEN_INSTRUCTIONS_CLOSE
@@ -23,52 +52,163 @@ void yyerror(const char *s);
 %token TOKEN_VAR_FLOAT_OPEN TOKEN_VAR_FLOAT_CLOSE
 %token TOKEN_VAR_BOOLEAN_OPEN TOKEN_VAR_BOOLEAN_CLOSE
 %token TOKEN_VAR_STRING_OPEN TOKEN_VAR_STRING_CLOSE
-%token TOKEN_EXPRESSION TOKEN_STRING
+%token TOKEN_EXPRESSION
+%token <strVal> TOKEN_STRING
 %token TOKEN_PLUS TOKEN_MINUS TOKEN_MULTIPLY TOKEN_DIVIDE
 %token TOKEN_GREATER_THAN TOKEN_LOWER_THAN
 %token TOKEN_GREATER_OR_EQUAL TOKEN_LOWER_OR_EQUAL TOKEN_EQUAL
 %token TOKEN_OPEN_PARENTHESIS TOKEN_CLOSE_PARENTHESIS
 %token TOKEN_ASSIGN TOKEN_QUOTE
-%token IDENTIFICATEUR TOKEN_INT TOKEN_FLOAT TOKEN_BOOLEAN
+%token <strVal> IDENTIFICATEUR
+%token <intVal> TOKEN_INT
+%token <floatVal> TOKEN_FLOAT
+%token <boolVal> TOKEN_BOOLEAN
 
-/* Operator precedence */
-%left TOKEN_PLUS TOKEN_MINUS
-%left TOKEN_MULTIPLY TOKEN_DIVIDE
-%left TOKEN_GREATER_THAN TOKEN_LOWER_THAN TOKEN_GREATER_OR_EQUAL TOKEN_LOWER_OR_EQUAL TOKEN_EQUAL
+/* Type declarations for non-terminals */
+%type <attr> attributes
+%type <intVal> expr_arithmetique terme facteur
+%type <boolVal> expr_logique
+
 
 %%
 
 program: 
    TOKEN_PROGRAM_OPEN 
-   TOKEN_VARIABLES_OPEN declaration_list TOKEN_VARIABLES_CLOSE 
+   variables_list
    TOKEN_INSTRUCTIONS_OPEN instruction_list TOKEN_INSTRUCTIONS_CLOSE 
    TOKEN_PROGRAM_CLOSE
    ;
 
-declaration_list:
-   declaration_list declaration 
+variables_list:
+   TOKEN_VARIABLES_OPEN declaration_list TOKEN_VARIABLES_CLOSE
    | /* empty */
-   ;
 
-declaration:
-   TOKEN_VAR_INT_OPEN IDENTIFICATEUR TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE
-   | TOKEN_VAR_FLOAT_OPEN IDENTIFICATEUR TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE 
-   | TOKEN_VAR_STRING_OPEN IDENTIFICATEUR TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE
-   | TOKEN_VAR_BOOLEAN_OPEN IDENTIFICATEUR TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE
+
+declaration_list:
+   TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        int value = $4;
+        updateSymbolValue(&symbolTable, $2.name, &value);
+    } declaration_list
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        float value = (float)$4;
+        updateSymbolValue(&symbolTable, $2.name, &value);
+    } declaration_list
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        updateSymbolValue(&symbolTable, $2.name, &$4);
+    } declaration_list
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        updateSymbolValue(&symbolTable, $2.name, &$4);
+    } declaration_list
+   | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE declaration_list
+   | TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        int value = $4;
+        updateSymbolValue(&symbolTable, $2.name, &value);
+    }
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        float value = (float)$4;
+        updateSymbolValue(&symbolTable, $2.name, &value);
+    }
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        updateSymbolValue(&symbolTable, $2.name, &$4);
+    }
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        updateSymbolValue(&symbolTable, $2.name, &$4);
+    }
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE
+   | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
+        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+    }
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+    }
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
+    }
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+    }
+   | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
+   | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
+        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+    }
+   | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+    }
+   | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG {
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
+    }
+   | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+    }
+   | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
+   
 
 attributes:
-   IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING attributes
-   | /* void */
+   IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING attributes {
+        if (strcmp($1,"name")==0){
+        $$.name = strdup($3);  // this is the variable name
+        $$.type = TYPE_STRING;
+        }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
+        $$.name = strdup($1);
+        $$.value.strVal = strdup($3);  
+        $$.type = TYPE_STRING;
+        }
+    } 
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes {
+        //this is to get just the value of the attribute and its name
+        $$.name = strdup($1);
+        $$.value.intVal = $4;  
+        $$.type = TYPE_INTEGER;
+    } 
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes {
+        $$.name = strdup($1);
+        $$.value.boolVal = $4;  
+        $$.type = TYPE_BOOLEAN;
+    } 
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING {
+        if (strcmp($1,"name")==0){
+        $$.name = strdup($3);  // this is the variable name
+        $$.type = TYPE_STRING;
+        }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
+        $$.name = strdup($1);
+        $$.value.strVal = strdup($3);  
+        $$.type = TYPE_STRING;
+        }
+    }
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
+        $$.name = strdup($1);
+        $$.value.intVal = $4;  
+        $$.type = TYPE_INTEGER;
+    }
+   | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
+        $$.name = strdup($1);
+        $$.value.boolVal = $4;  
+        $$.type = TYPE_BOOLEAN;
+    }
    ;
+
 elements:
    element elements  | /* void */
    ;
+
 element:
+<<<<<<< HEAD
+   TOKEN_ELEMENT_OPEN attributes TOKEN_SELF_CLOSING_TAG
+   ;
+=======
    TOKEN_ELEMENT_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS TOKEN_SELF_CLOSING_TAG
 
 
+>>>>>>> fc3480aee0e85cc791e1baa397c14f0ed2cdc726
 
 instruction_list:
    instruction_list instruction
@@ -83,14 +223,35 @@ instruction:
    ;
 
 assignment:
-   TOKEN_ASSIGN_OPEN IDENTIFICATEUR TOKEN_ASSIGN expr TOKEN_SELF_CLOSING_TAG
+   TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
+        //update the value of a variable
+        SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
+        if (!entry) {
+            yyerror("Variable undefined");
+        } else {
+            switch (entry->type) {
+                case TYPE_INTEGER:
+                    updateSymbolValue(&symbolTable, $2.name, &($2.value.intVal));
+                    break;
+                case TYPE_FLOAT:
+                    updateSymbolValue(&symbolTable, $2.name, &($2.value.floatVal));
+                    break;
+                case TYPE_STRING:
+                    updateSymbolValue(&symbolTable, $2.name, &($2.value.strVal));
+                    break;
+                case TYPE_BOOLEAN:
+                    updateSymbolValue(&symbolTable, $2.name, &($2.value.boolVal));
+                    break;
+            }
+        }
+    }
    ;
 
 if_statement:
-   TOKEN_IF_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS TOKEN_END_TAG 
+   TOKEN_IF_OPEN attributes TOKEN_END_TAG 
    instruction_list 
    TOKEN_IF_CLOSE
-   |    TOKEN_IF_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS TOKEN_END_TAG  
+   | TOKEN_IF_OPEN attributes TOKEN_END_TAG  
    instruction_list 
    TOKEN_ELSE 
    instruction_list 
@@ -98,58 +259,80 @@ if_statement:
    ;
 
 while_statement:
-   TOKEN_WHILE_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS TOKEN_END_TAG 
+   TOKEN_WHILE_OPEN attributes TOKEN_END_TAG 
    instruction_list 
    TOKEN_WHILE_CLOSE
    ;
 
 print_statement:
-   TOKEN_PRINT_OPEN IDENTIFICATEUR TOKEN_ASSIGN expr TOKEN_SELF_CLOSING_TAG
-   ;
-
-expr:
-   expr_arithmetique
-   | expr_logique
-   | TOKEN_STRING
+   TOKEN_PRINT_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
 
 expr_arithmetique:
    terme
-   | expr_arithmetique TOKEN_PLUS terme  
-   | expr_arithmetique TOKEN_MINUS terme
+   | expr_arithmetique TOKEN_PLUS terme { $$ = $1 + $3; }
+   | expr_arithmetique TOKEN_MINUS terme { $$ = $1 - $3; }
    ;
 
 terme:
    facteur
-   | terme TOKEN_MULTIPLY facteur
-   | terme TOKEN_DIVIDE facteur  
+   | terme TOKEN_MULTIPLY facteur { $$ = $1 * $3; } 
+   | terme TOKEN_DIVIDE facteur { $$ = $1 / $3; }  
    ;
 
 facteur:
-   TOKEN_INT
-   | TOKEN_FLOAT  
-   | IDENTIFICATEUR
-   | TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS
+   TOKEN_INT { $$ = $1; }
+   | TOKEN_FLOAT { $$ = (int)$1; }
+   | IDENTIFICATEUR {
+        $$=1;
+    }
+   | TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS { $$ = $2; }
    ; 
 
 expr_logique:
-   expr_arithmetique TOKEN_EQUAL expr_arithmetique
-   | expr_arithmetique TOKEN_GREATER_THAN expr_arithmetique
-   | expr_arithmetique TOKEN_LOWER_THAN expr_arithmetique
-   | expr_arithmetique TOKEN_GREATER_OR_EQUAL expr_arithmetique 
-   | expr_arithmetique TOKEN_LOWER_OR_EQUAL expr_arithmetique
-   | TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS
-   | TOKEN_BOOLEAN
+   expr_arithmetique TOKEN_EQUAL expr_arithmetique {
+    $$ = ($1 == $3); 
+  }
+   | expr_arithmetique TOKEN_GREATER_THAN expr_arithmetique {
+    $$ = ($1 > $3);
+  }
+   | expr_arithmetique TOKEN_LOWER_THAN expr_arithmetique {
+    $$ = ($1 < $3); 
+  }
+   | expr_arithmetique TOKEN_GREATER_OR_EQUAL expr_arithmetique  {
+    $$ = ($1 >= $3); 
+  }
+   | expr_arithmetique TOKEN_LOWER_OR_EQUAL expr_arithmetique {
+    $$ = ($1 <= $3); 
+  }
+   | TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
+    $$ = $2 ; 
+  }
+   | TOKEN_BOOLEAN 
    ;
 
 %%
-   
+
+void yysuccess(char *s){
+    currentColumn+=yyleng;
+}
+
 void yyerror(const char *s) {
-   fprintf(stderr, "File \"Test\", line %d, character %d: syntaxic error\n", 
-      yylineno, current_column-yyleng);
+    fprintf(stdout, "File output, line %d, character %d :  %s \n", yylineno, currentColumn, s);
 }
 
 int main(void) {
-   yyparse();
-   return 0;
+    initSymbolTable(&symbolTable);
+    if (yyparse() == 0) {
+        printf("Parsing successful\n");
+    } else {
+        fprintf(stderr, "Parsing failed\n");
+        return 1;
+    }
+
+    printSymbolTable(&symbolTable);
+    freeSymbolTable(&symbolTable);
+    return 0;
 }
+
+

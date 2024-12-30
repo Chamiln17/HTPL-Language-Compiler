@@ -2,38 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "tableSymbole.h"
 
-// Definition des types de donnees
-typedef enum {
-    TYPE_INTEGER,
-    TYPE_FLOAT,
-    TYPE_STRING,
-    TYPE_BOOLEAN,
-    TYPE_ARRAY,
-    TYPE_UNDEFINED
-} DataType;
-
-// Structure pour une entree dans la table des symboles
-typedef struct SymbolEntry {
-    char* name;               // Nom de l'identificateur
-    DataType type;            // Type de donnees
-    int memory_address;       // Adresse memoire
-    bool is_initialized;      // Indique si la variable est initialisee
-    union {
-        int int_value;
-        float float_value;
-        char* string_value;
-        bool bool_value;
-    } value;
-    struct SymbolEntry* next; // Chaînage pour gerer les collisions de hachage
-} SymbolEntry;
-
-// Table de symboles
-#define TABLE_SIZE 100
-
-typedef struct {
-    SymbolEntry* entries[TABLE_SIZE];
-} SymbolTable;
 
 // Fonction de hachage
 unsigned int hash(const char* name) {
@@ -41,7 +11,7 @@ unsigned int hash(const char* name) {
     while (*name) {
         hash = (hash * 31) + *name++;
     }
-    return hash % TABLE_SIZE;
+    return 2;
 }
 
 // Initialiser la table des symboles
@@ -225,42 +195,42 @@ void freeSymbolTable(SymbolTable* table) {
     }
 }
 
-// Exemple d'utilisation
-int main() {
-    SymbolTable table;
-    initSymbolTable(&table);
+// // Exemple d'utilisation
+// int main() {
+//     SymbolTable table;
+//     initSymbolTable(&table);
     
-    // Ajout de symboles
-    addSymbol(&table, "x", TYPE_INTEGER);
-    addSymbol(&table, "pi", TYPE_FLOAT);
-    addSymbol(&table, "nom", TYPE_STRING);
+//     // Ajout de symboles
+//     addSymbol(&table, "x", TYPE_INTEGER);
+//     addSymbol(&table, "pi", TYPE_FLOAT);
+//     addSymbol(&table, "nom", TYPE_STRING);
     
-    // Mise à jour des valeurs
-    int x_val = 42;
-    float pi_val = 3.14159;
-    char* nom_val = "Alice";
+//     // Mise à jour des valeurs
+//     int x_val = 42;
+//     float pi_val = 3.14159;
+//     char* nom_val = "Alice";
     
-    updateSymbolValue(&table, "x", &x_val);
-    updateSymbolValue(&table, "pi", &pi_val);
-    updateSymbolValue(&table, "nom", &nom_val);
+//     updateSymbolValue(&table, "x", &x_val);
+//     updateSymbolValue(&table, "pi", &pi_val);
+//     updateSymbolValue(&table, "nom", &nom_val);
     
-    // Affichage
-    printSymbolTable(&table);
+//     // Affichage
+//     printSymbolTable(&table);
     
-    // Recherche
-    SymbolEntry* found = findSymbol(&table, "x");
-    if (found) {
-        printf("Symbole 'x' trouve.\n");
-    }
+//     // Recherche
+//     SymbolEntry* found = findSymbol(&table, "x");
+//     if (found) {
+//         printf("Symbole 'x' trouve.\n");
+//     }
     
-    // Suppression
-    removeSymbol(&table, "pi");
+//     // Suppression
+//     removeSymbol(&table, "pi");
     
-    // Affichage après suppression
-    printSymbolTable(&table);
+//     // Affichage après suppression
+//     printSymbolTable(&table);
     
-    // Liberation de la memoire
-    freeSymbolTable(&table);
+//     // Liberation de la memoire
+//     freeSymbolTable(&table);
     
-    return 0;
-}
+//     return 0;
+// }

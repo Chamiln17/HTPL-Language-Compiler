@@ -1,5 +1,21 @@
-<variables> 
-<variables> 
-    <string attribut2="unTexte"> "HelloWorld" </string> 
-    <string attribut2="unTexte2"> "HelloWorld" </string> 
-</variables>
+<program>
+<variables>
+        <int name="counter">(0+8-5)</int>
+        <string name="message">"Test"</string>
+    </variables>
+    
+    <instructions>
+        <assign counter=(counter - 1)/>
+        <print value="Counter initialized to 10"/>
+        
+        <while condition=(counter >> 0)>
+            <print value="Counter: + counter"/>
+            <assign counter=(counter - 1)/>
+        </while>
+        
+        <if condition=(counter == 0)>
+            <print value="Counter reached zero"/>
+        </if>
+    </instructions>
+</program>
+
