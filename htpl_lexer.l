@@ -2,7 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include "tableSymbole.h"
+
+typedef struct {
+    char* name;
+    union {
+        int intVal;
+        float floatVal;
+        char* strVal;
+        bool boolVal;
+    } value;
+    DataType type;
+} AttributeValue;
+
 #include "syntaxique.tab.h"
+
+
 
 #define OUTPUT_METHOD "FILE" // FILE or CONSOLE
 #define OUTPUTFILE "lexical-lexemes" // Output file name
@@ -14,6 +30,8 @@ extern int currentColumn;
 // Global variable to hold the current token type
 int current_token;
 FILE *output_file;
+
+
 
 void token_action(int token, char* text, FILE* output_file) {
     const char* token_name;
@@ -155,16 +173,16 @@ comment     \#[^\n]*
 "="                   { current_token = TOKEN_ASSIGN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 "\""                  { current_token = TOKEN_QUOTE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-{float}              { current_token = TOKEN_FLOAT; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
-{int}                { current_token = TOKEN_INT; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
-{boolean}            { current_token = TOKEN_BOOLEAN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+{float}              { yylval.floatVal = atof(yytext); current_token = TOKEN_FLOAT; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+{int}                { yylval.intVal = atoi(yytext); current_token = TOKEN_INT; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+{boolean}            { yylval.boolVal = (strcmp(yytext, "true") == 0);current_token = TOKEN_BOOLEAN; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-{ID}                  { current_token = IDENTIFICATEUR; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+{ID}                  { current_token = IDENTIFICATEUR; token_action(current_token, yytext, output_file);yysuccess(yytext); yylval.strVal = strdup(yytext); return current_token; }
 
 "/>"                  { current_token = TOKEN_SELF_CLOSING_TAG; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 ">"                   { current_token = TOKEN_END_TAG; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
 
-{string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }
+{string}              { current_token = TOKEN_STRING; token_action(current_token, yytext, output_file);yysuccess(yytext);  yylval.strVal = strdup(yytext); return current_token; }
 
 .                     { yyerror("Unexpected token"); yyterminate();}
 

@@ -5,12 +5,12 @@
     </variables>
     
     <instructions>
-        <assign x=(x - 1)/>
+        <assign counter=(counter - 1)/>
         <print value="Counter initialized to 10"/>
         
         <while condition=(counter >> 0)>
             <print value="Counter: + counter"/>
-            <assign x=(x - 1)/>
+            <assign counter=(counter - 1)/>
         </while>
         
         <if condition=(counter == 0)>
@@ -18,3 +18,4 @@
         </if>
     </instructions>
 </program>
+
