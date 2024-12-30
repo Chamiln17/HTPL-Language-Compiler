@@ -6,7 +6,9 @@ flex htpl_lexer.l && gcc lex.yy.c
 
 # C Syntaxical analyzer commands
 cd analyseur_syntaxique
+flex htpl_lexer_manual.l && gcc lex.yy.c
 gcc analyseur_syntaxique.c -o analyseur
+./a.out test.htpl
 ./analyseur input.txt output.txt
 
 # Bison Syntaxical analyzer commands
