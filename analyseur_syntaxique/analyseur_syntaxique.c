@@ -173,6 +173,7 @@ void Z(void);
 void V(void);
 void E(void);
 void E1(void);
+void E2(void);
 void A(void);
 
 // ====================================================================
@@ -195,7 +196,8 @@ void Z(void) {
 }
 
 // --------------------------------------------------------------------
-// <V> ::= TOKEN_VARIABLES_OPEN <E> TOKEN_VARIABLES_CLOSE | ε 
+// 1. <V> ::= TOKEN_VARIABLES_OPEN <E> TOKEN_VARIABLES_CLOSE
+// 2. <V> ::= ε 
 // --------------------------------------------------------------------
 void V(void) {
     if (currentToken.type == TOKEN_VARIABLES_OPEN) {
@@ -210,16 +212,22 @@ void V(void) {
 }
 
 // --------------------------------------------------------------------
-// <E> ::= TOKEN_VAR_STRING_OPEN <A> TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE <E1> | TOKEN_VAR_STRING_OPEN <A> TOKEN_SELF_CLOSING_TAG <E1>
+// 3. <E> ::= TOKEN_VAR_STRING_OPEN <A> <E1>
 // --------------------------------------------------------------------
 void E(void) {
     if (currentToken.type != TOKEN_VAR_STRING_OPEN) {
         error("TOKEN_VAR_STRING_OPEN attendu");
     }
-
     nextToken();
     A();
+    E1();
+}
 
+// --------------------------------------------------------------------
+// 4. <E1> ::= TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE <E2>
+// 5. <E1> ::= TOKEN_SELF_CLOSING_TAG <E2>
+// --------------------------------------------------------------------
+void E1(void) {
     if (currentToken.type == TOKEN_END_TAG) {
         nextToken();
         if (currentToken.type != TOKEN_STRING) {
@@ -230,19 +238,20 @@ void E(void) {
             error("TOKEN_VAR_STRING_CLOSE attendu");
         }
         nextToken();
-        E1();
+        E2();
     } else if (currentToken.type == TOKEN_SELF_CLOSING_TAG) {
         nextToken();
-        E1();
+        E2();
     } else {
         error("TOKEN_END_TAG ou TOKEN_SELF_CLOSING_TAG attendu");
     }
 }
 
 // --------------------------------------------------------------------
-// <E1> ::= <E> | ε
+// 6. <E2> ::= <E>
+// 7. <E2> ::= ε
 // --------------------------------------------------------------------
-void E1(void) {
+void E2(void) {
     if (currentToken.type == TOKEN_VAR_STRING_OPEN) {
         E();
     }
@@ -250,7 +259,7 @@ void E1(void) {
 }
 
 // --------------------------------------------------------------------
-// <A> ::= TOKEN_ATTRIBUTE_NAME TOKEN_ASSIGN TOKEN_STRING
+// 8. <A> ::= TOKEN_ATTRIBUTE_NAME TOKEN_ASSIGN TOKEN_STRING
 // --------------------------------------------------------------------
 void A(void) {
     if (currentToken.type != TOKEN_ATTRIBUTE_NAME) {
@@ -268,6 +277,7 @@ void A(void) {
     }
     nextToken();
 }
+
 
 int main(int argc, char* argv[]) {
 
