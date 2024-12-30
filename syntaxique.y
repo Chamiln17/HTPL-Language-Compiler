@@ -201,8 +201,14 @@ elements:
    ;
 
 element:
+<<<<<<< HEAD
    TOKEN_ELEMENT_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
+=======
+   TOKEN_ELEMENT_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS TOKEN_SELF_CLOSING_TAG
+
+
+>>>>>>> fc3480aee0e85cc791e1baa397c14f0ed2cdc726
 
 instruction_list:
    instruction_list instruction

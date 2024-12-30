@@ -7,3 +7,4 @@ bison -d syntaxique.y
 flex htpl_lexer.l
 gcc -o syntaxique syntaxique.tab.c tableSymboles.c lex.yy.c -lfl
 ./syntaxique < test.htpl
+gcc -o syntaxique syntaxique.tab.c lex.yy.c -lfl

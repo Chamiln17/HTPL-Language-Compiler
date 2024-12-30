@@ -20,7 +20,7 @@ typedef struct {
 
 
 
-#define OUTPUT_METHOD "FILE" // FILE or CONSOLE
+#define OUTPUT_METHOD "PARSER" // FILE or CONSOLE or PARSER
 #define OUTPUTFILE "lexical-lexemes" // Output file name
 
 extern void yysuccess(char *s);
@@ -88,7 +88,12 @@ void token_action(int token, char* text, FILE* output_file) {
     }
 
     if (output_file) {
-        fprintf(output_file, "%s , %s \n", token_name , text);
+        if (OUTPUT_METHOD == "PARSER") {
+            fprintf(output_file, "%s ", token_name);
+        }
+        else if (OUTPUT_METHOD == "FILE") {
+            fprintf(output_file, "%s , %s \n", token_name , text);
+        }
     }
     else {
         printf("Token: %d, Content: %s\n", token, text);
@@ -200,7 +205,7 @@ int main(int argc, char **argv) {
     }
 
     // Open output file once at the start
-    if (OUTPUT_METHOD == "FILE"){
+    if (OUTPUT_METHOD == "FILE" || OUTPUT_METHOD == "PARSER") {
         output_file = fopen(OUTPUTFILE, "w");
         if (!output_file) {
             fprintf(stderr, "Cannot create output file lexical-lexemes\n");
@@ -219,6 +224,10 @@ int main(int argc, char **argv) {
     }
 
     if (output_file) {  // Only close if we actually opened it
+        // Print # at the end of the file
+        if (OUTPUT_METHOD == "PARSER") {
+            fprintf(output_file, "#");
+        }
         fclose(output_file);
     }
 
