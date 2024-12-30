@@ -5,7 +5,7 @@ flex htpl_lexer.l && gcc lex.yy.c
 ./a.out test.htpl
 
 # C Syntaxical analyzer commands
-cd analyseur_syntaxique
+cd analyseur_syntaxique_c
 flex htpl_lexer_manual.l && gcc lex.yy.c
 gcc analyseur_syntaxique.c -o analyseur
 ./a.out test.htpl

@@ -1,0 +1,16 @@
+VARIABLES_OPEN , <variables> 
+VAR_STRING_OPEN , <string 
+IDENTIFICATEUR , name 
+ASSIGN , = 
+STRING , "unTexte" 
+END_TAG , > 
+STRING , "Hello World" 
+VAR_STRING_CLOSE , </string> 
+VAR_STRING_OPEN , <string 
+IDENTIFICATEUR , name 
+ASSIGN , = 
+STRING , "unTexte2" 
+END_TAG , > 
+STRING , "Hello World2" 
+VAR_STRING_CLOSE , </string> 
+VARIABLES_CLOSE , </variables> 
