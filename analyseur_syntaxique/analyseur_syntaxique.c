@@ -13,7 +13,7 @@ typedef enum {
     TOKEN_VAR_STRING_CLOSE,
     TOKEN_END_TAG,
     TOKEN_SELF_CLOSING_TAG,
-    TOKEN_ATTRIBUTE_NAME,
+    TOKEN_IDENTIFICATEUR,
     TOKEN_ASSIGN,
     TOKEN_STRING,
     TOKEN_EOF,
@@ -138,23 +138,23 @@ void nextToken(void) {
     tokenBuffer[bufferIndex] = '\0';
 
     // Déterminer un type au token
-    if (strcmp(tokenBuffer, "TOKEN_VARIABLES_OPEN") == 0)
+    if (strcmp(tokenBuffer, "VARIABLES_OPEN") == 0)
         currentToken.type = TOKEN_VARIABLES_OPEN;
-    else if (strcmp(tokenBuffer, "TOKEN_VARIABLES_CLOSE") == 0)
+    else if (strcmp(tokenBuffer, "VARIABLES_CLOSE") == 0)
         currentToken.type = TOKEN_VARIABLES_CLOSE;
-    else if (strcmp(tokenBuffer, "TOKEN_VAR_STRING_OPEN") == 0)
+    else if (strcmp(tokenBuffer, "VAR_STRING_OPEN") == 0)
         currentToken.type = TOKEN_VAR_STRING_OPEN;
-    else if (strcmp(tokenBuffer, "TOKEN_VAR_STRING_CLOSE") == 0)
+    else if (strcmp(tokenBuffer, "VAR_STRING_CLOSE") == 0)
         currentToken.type = TOKEN_VAR_STRING_CLOSE;
-    else if (strcmp(tokenBuffer, "TOKEN_END_TAG") == 0)
+    else if (strcmp(tokenBuffer, "END_TAG") == 0)
         currentToken.type = TOKEN_END_TAG;
-    else if (strcmp(tokenBuffer, "TOKEN_SELF_CLOSING_TAG") == 0)
+    else if (strcmp(tokenBuffer, "SELF_CLOSING_TAG") == 0)
         currentToken.type = TOKEN_SELF_CLOSING_TAG;
-    else if (strcmp(tokenBuffer, "TOKEN_ATTRIBUTE_NAME") == 0)
-        currentToken.type = TOKEN_ATTRIBUTE_NAME;
-    else if (strcmp(tokenBuffer, "TOKEN_ASSIGN") == 0)
+    else if (strcmp(tokenBuffer, "IDENTIFICATEUR") == 0)
+        currentToken.type = TOKEN_IDENTIFICATEUR;
+    else if (strcmp(tokenBuffer, "ASSIGN") == 0)
         currentToken.type = TOKEN_ASSIGN;
-    else if (strcmp(tokenBuffer, "TOKEN_STRING") == 0)
+    else if (strcmp(tokenBuffer, "STRING") == 0)
         currentToken.type = TOKEN_STRING;
     else if (strcmp(tokenBuffer, "#") == 0)
         currentToken.type = TOKEN_DIAZ;
@@ -259,11 +259,11 @@ void E2(void) {
 }
 
 // --------------------------------------------------------------------
-// 8. <A> ::= TOKEN_ATTRIBUTE_NAME TOKEN_ASSIGN TOKEN_STRING
+// 8. <A> ::= TOKEN_IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING
 // --------------------------------------------------------------------
 void A(void) {
-    if (currentToken.type != TOKEN_ATTRIBUTE_NAME) {
-        error("TOKEN_ATTRIBUTE_NAME attendu");
+    if (currentToken.type != TOKEN_IDENTIFICATEUR) {
+        error("TOKEN_IDENTIFICATEUR attendu");
     }
     nextToken();
 

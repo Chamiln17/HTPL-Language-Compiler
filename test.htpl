@@ -1,2 +1,5 @@
-<variables> <string attribut2="unTexte"> HelloWorld </string> </variables>
-
+<variables> 
+<variables> 
+    <string attribut2="unTexte"> "HelloWorld" </string> 
+    <string attribut2="unTexte2"> "HelloWorld" </string> 
+</variables>
