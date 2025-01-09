@@ -26,12 +26,7 @@ char* trimQuotes(char* str) {
 
 typedef struct {
     char* name;
-    union {
-        int intVal;
-        float floatVal;
-        char* strVal;
-        bool boolVal;
-    } value;
+    char* value;
     DataType type;
 } AttributeValue;
 
@@ -47,14 +42,34 @@ char res[15];
 
 Quad quad[1000];
 
+void createQuad(char* op, char* opr1, char* opr2, char* res) {
+    strcpy(quad[QC].op, op);
+    strcpy(quad[QC].opr1, opr1);
+    strcpy(quad[QC].opr2, opr2);
+    strcpy(quad[QC].res, res);
+    QC++;
+}
+
+
+    void printQuad() {
+        printf("\n=== Quadruplets ===\n");
+        for(int i = 0; i < QC; i++) {
+            printf("%d- (%s, %s, %s, %s)\n", i, quad[i].op, quad[i].opr1, quad[i].opr2, quad[i].res);
+        }
+        printf("==================\n");
+    }
+
+
+int sauv_begin_if[100];
 int sauv_fin_if[100];
 int sauv_fin_else[100];
 int sauv_begin_While[100];
-int sauv_while_condition[100];
+int sauv_fin_while[100];
+int top_begin_if = -1;
 int top_fin_if = -1;
 int top_fin_else = -1;
 int top_begin_While = -1;
-int top_while_condition = -1;
+int top_fin_while = -1;
 void push(int stack[], int *top, int value) {
     stack[++(*top)] = value;
 }
@@ -110,8 +125,8 @@ int pop(int stack[], int *top) {
 
 /* Type declarations for non-terminals */
 %type <attr> attributes
-%type <intVal> expr_arithmetique terme facteur
-%type <boolVal> expr_logique
+%type <strVal> expr_arithmetique terme facteur
+%type <strVal> expr_logique
 
 
 %%
@@ -130,147 +145,104 @@ variables_list:
 
 declaration_list:
    TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        int value = $4;
-        updateSymbolValue(&symbolTable, $2.name, &value);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        // int value = $4;
+        //updateSymbolValue(&symbolTable, $2.name, &value);
+        printf("Declaration:" );
+        printf("Name: %s\n", $4);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        float value = (float)$4;
-        updateSymbolValue(&symbolTable, $2.name, &value);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        // float value = (float)$4;
+        //updateSymbolValue(&symbolTable, $2.name, &value);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        updateSymbolValue(&symbolTable, $2.name, &$4);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        updateSymbolValue(&symbolTable, $2.name, &$4);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE declaration_list
    | TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        int value = $4;
-        updateSymbolValue(&symbolTable, $2.name, &value);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        // int value = $4;
+        //updateSymbolValue(&symbolTable, $2.name, &value);
+        printf("Declaration:" );
+        printf("Name: %s\n", $4);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        float value = (float)$4;
-        updateSymbolValue(&symbolTable, $2.name, &value);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        // float value = (float)$4;
+        //updateSymbolValue(&symbolTable, $2.name, &value);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        updateSymbolValue(&symbolTable, $2.name, &$4);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        updateSymbolValue(&symbolTable, $2.name, &$4);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = $4;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        char temp[15];
+        sprintf(temp, "%s", $4);
+        createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE
    | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = 0;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        createQuad(":=", "0", "", $2.name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = 0;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        createQuad(":=", "0.0", "", $2.name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = "";
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        createQuad(":=", "", "", $2.name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = "true";
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        
+        createQuad(":=", "0", "", $2.name);
     }
    | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
    | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = 0;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        createQuad(":=", "0", "", $2.name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = 0;
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        
+        createQuad(":=", "0.0", "", $2.name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = "";
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        createQuad(":=", "", "", $2.name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        quad[QC].op = ":=";
-        quad[QC].opr1 = "true";
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        createQuad(":=", "0", "", $2.name);
     }
     | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG
     ;
@@ -283,19 +255,19 @@ attributes:
         $$.type = TYPE_STRING;
         }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
         $$.name = strdup($1);
-        $$.value.strVal = strdup($3);  
+        $$.value = strdup($3);  
         $$.type = TYPE_STRING;
         }
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes {
         //this is to get just the value of the attribute and its name
         $$.name = strdup($1);
-        $$.value.intVal = $4;  
+        $$.value = $4;  
         $$.type = TYPE_INTEGER;
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes {
         $$.name = strdup($1);
-        $$.value.boolVal = $4;  
+        $$.value = $4;  
         $$.type = TYPE_BOOLEAN;
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING {
@@ -304,18 +276,18 @@ attributes:
         $$.type = TYPE_STRING;
         }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
         $$.name = strdup($1);
-        $$.value.strVal = strdup($3);  
+        $$.value = strdup($3);  
         $$.type = TYPE_STRING;
         }
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
         $$.name = strdup($1);
-        $$.value.intVal = $4;  
+        $$.value = $4;  
         $$.type = TYPE_INTEGER;
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
         $$.name = strdup($1);
-        $$.value.boolVal = $4;  
+        $$.value = $4;  
         $$.type = TYPE_BOOLEAN;
     }
    ;
@@ -335,7 +307,7 @@ instruction_list:
 
 instruction:
    assignment
-   | if_statement  
+   | if_statement
    | while_statement
    | print_statement
    ;
@@ -343,88 +315,240 @@ instruction:
 assignment:
     TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         //update the value of a variable
-        SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
-        if (!entry) {
-            yyerror("Variable undefined");
-        }
-        if (entry->type == TYPE_INTEGER) {
-            quad[QC].opr1 = $2.value.intVal;
-        } else if (entry->type == TYPE_FLOAT) {
-            quad[QC].opr1 = $2.value.floatVal;
-        } else if (entry->type == TYPE_STRING) {
-            quad[QC].opr1 = $2.value.strVal;
-        } else if (entry->type == TYPE_BOOLEAN) {
-            quad[QC].opr1 = $2.value.boolVal ? "true" : "false";
-        }
-        quad[QC].op = ":=";
-        quad[QC].opr2 = "";
-        quad[QC].res = $2.name;
-        QC++;
+        // SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
+        // if (!entry) {
+        //     yyerror("Variable undefined");
+        // }
+        char temp[15];
+        sprintf(temp, "%s", $2.value);
+        // if (entry->type == TYPE_INTEGER) {
+        //     sprintf(temp, "%d", $2.value);
+        // } else if (entry->type == TYPE_FLOAT) {
+        //     sprintf(temp, "%f", $2.value);
+        // } else if (entry->type == TYPE_STRING) {
+        //     sprintf(temp, "%s", $2.value);
+        // } else if (entry->type == TYPE_BOOLEAN) {
+        //     sprintf(temp, "%d", $2.value);
+        // }
+        createQuad(":=", temp, "", $2.name);
 }
 ;
 
+
+
 if_statement:
-   TOKEN_IF_OPEN attributes TOKEN_END_TAG 
-   instruction_list 
-   TOKEN_IF_CLOSE 
-   | TOKEN_IF_OPEN attributes TOKEN_END_TAG  
-   instruction_list 
+   if_condition TOKEN_END_TAG instruction_list {
+    char temp[15];
+    sprintf(temp, "%d", QC);
+    strcpy(quad[sauv_begin_if[top_begin_if--]].opr1, temp);
+   } TOKEN_IF_CLOSE 
+   | if_condition TOKEN_END_TAG  
+   instruction_list {
+
+    sauv_fin_if[++top_fin_if] = QC;
+    createQuad("BR", "", "", "");
+
+    char temp[15];
+    sprintf(temp, "%d", QC);
+    strcpy(quad[sauv_begin_if[top_begin_if--]].opr1, temp);
+   }
    TOKEN_ELSE 
    instruction_list 
-   TOKEN_IF_CLOSE
+   TOKEN_IF_CLOSE {
+    char temp[15];
+    sprintf(temp, "%d", QC);
+    strcpy(quad[sauv_fin_if[top_fin_if--]].opr1, temp);
+   }
    ;
+if_condition:
+TOKEN_IF_OPEN attributes {
+
+    if (strcmp($2.name, "condition") == 0) {
+        sauv_begin_if[++top_begin_if] = QC;
+        char temp[15];
+        sprintf(temp, "%s", $2.value);
+        createQuad("BZ", "", "", temp);
+    } else {
+        yyerror("Invalid attribute for if statement");
+    }
+   } ;
 
 while_statement:
-   TOKEN_WHILE_OPEN attributes TOKEN_END_TAG 
+   while_condition TOKEN_END_TAG 
    instruction_list 
-   TOKEN_WHILE_CLOSE
+   TOKEN_WHILE_CLOSE {
+    int begin_while = sauv_begin_While[top_begin_While--];
+    char temp[15];
+    sprintf(temp, "%d", begin_while);
+    createQuad("BR", temp, "", "");
+
+    
+    sprintf(quad[begin_while].opr1, "%d", QC);
+
+    
+
+   }
    ;
+while_condition:
+    TOKEN_WHILE_OPEN attributes {
+
+    if (strcmp($2.name, "condition") == 0) {
+        sauv_begin_While[++top_begin_While] = QC;
+        char temp[15];
+        sprintf(temp, "%s", $2.value);
+        createQuad("BZ", "", "", temp);
+
+    } else {
+        yyerror("Invalid attribute for if statement");
+    }
+    };
 
 print_statement:
    TOKEN_PRINT_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
 
 expr_arithmetique:
-   terme
-   | expr_arithmetique TOKEN_PLUS terme { $$ = $1 + $3; }
-   | expr_arithmetique TOKEN_MINUS terme { $$ = $1 - $3; }
+   terme {
+    char temp[15];
+    sprintf(temp, "%s", $1);
+    $$ = strdup(temp);
+
+   }
+   | expr_arithmetique TOKEN_PLUS terme {
+    char temp[15];
+    char opr1[15];
+    char opr2[15];
+    sprintf(temp, "T%d", ti++);
+    sprintf(opr1, "%s", $1);
+    sprintf(opr2, "%s", $3);
+     createQuad("+", opr1, opr2, temp);
+    $$ = strdup(temp);
+   }
+   | expr_arithmetique TOKEN_MINUS terme { 
+    char temp[15];
+    sprintf(temp, "T%d", ti++);
+     createQuad("-", $1, $3, temp);
+    //  sprintf($$, "%s", temp);
+    $$ = strdup(temp);
+
+   }
    ;
 
 terme:
-   facteur
-   | terme TOKEN_MULTIPLY facteur { $$ = $1 * $3; } 
-   | terme TOKEN_DIVIDE facteur { $$ = $1 / $3; }  
+   facteur {
+    
+    // strcpy($$, $1);
+
+    char temp[15];
+    sprintf(temp, "%s", $1);
+
+    $$ = strdup(temp);
+   }
+   | terme TOKEN_MULTIPLY facteur { 
+    char temp[15];
+    sprintf(temp, "T%d", ti++);
+     createQuad("*", $1, $3, temp);
+    //  sprintf($$, "%s", temp);
+    $$ = strdup(temp);
+    } 
+   | terme TOKEN_DIVIDE facteur {
+    char temp[15];
+    sprintf(temp, "T%d", ti++);
+     createQuad("/", $1, $3, temp);
+    //  sprintf($$, "%s", temp);
+    $$ = strdup(temp);
+     }  
    ;
 
 facteur:
-   TOKEN_INT { $$ = $1; }
-   | TOKEN_FLOAT { $$ = (int)$1; }
-   | IDENTIFICATEUR {
-        $$=1;
+   TOKEN_INT { 
+
+    // printf("heloo");
+    char temp[15];
+    sprintf(temp, "%d", $1);
+
+    $$ = strdup(temp);
+
     }
-   | TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS { $$ = $2; }
+   | TOKEN_FLOAT { 
+
+    char temp[15];
+    sprintf(temp, "%f", $1);
+
+    $$ = strdup(temp);
+    }
+   | IDENTIFICATEUR {
+    char temp[15];
+    sprintf(temp, "%s", $1);
+    printf("Debug - Facteur IDENTIFICATEUR: %s\n", $1);
+    $$ = strdup(temp);
+    }
+   | TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
+    // $$ = $2
+        char temp[15];
+        sprintf(temp, "%s", $2);
+
+        $$ = strdup(temp);
+     }
    ; 
 
 expr_logique:
    expr_arithmetique TOKEN_EQUAL expr_arithmetique {
-    $$ = ($1 == $3); 
+
+    
+
+    char tmp3[15];
+    sprintf(tmp3, "T%d", ti++);
+    
+    createQuad("==", $1, $3, tmp3);
+// strcpy($$, tmp3);
+    $$ = strdup(tmp3);
   }
    | expr_arithmetique TOKEN_GREATER_THAN expr_arithmetique {
-    $$ = ($1 > $3);
+
+    
+    char tmp3[15];
+    sprintf(tmp3, "T%d", ti++);
+    createQuad(">", $1, $3, tmp3);
+    $$ = strdup(tmp3);
   }
    | expr_arithmetique TOKEN_LOWER_THAN expr_arithmetique {
-    $$ = ($1 < $3); 
+
+    char tmp3[15];
+    sprintf(tmp3, "T%d", ti++);
+    
+    createQuad("<", $1, $3, tmp3);
+    // strcpy($$, tmp3);
+    $$ = strdup(tmp3);
   }
    | expr_arithmetique TOKEN_GREATER_OR_EQUAL expr_arithmetique  {
-    $$ = ($1 >= $3); 
+
+    char tmp3[15];
+    sprintf(tmp3, "T%d", ti++);
+    
+    createQuad(">=", $1, $3, tmp3);
+// strcpy($$, tmp3);
+    $$ = strdup(tmp3);
   }
    | expr_arithmetique TOKEN_LOWER_OR_EQUAL expr_arithmetique {
-    $$ = ($1 <= $3); 
+
+    char tmp3[15];
+    sprintf(tmp3, "T%d", ti++);
+    
+    createQuad("<=", $1, $3, tmp3);
+// strcpy($$, tmp3);
+    $$ = strdup(tmp3);
   }
    | TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
-    $$ = $2 ; 
+    $$ = strdup($2);
   }
-   | TOKEN_BOOLEAN 
+   | TOKEN_BOOLEAN {
+    // sprintf($$, "%d", $1);
+    char temp[15];
+    sprintf(temp, "%d", $1);
+    $$ = strdup(temp);
+    
+   }
    ;
 
 %%
@@ -438,16 +562,17 @@ void yyerror(const char *s) {
 }
 
 int main(void) {
-    initSymbolTable(&symbolTable);
+    // initSymbolTable(&symbolTable);
     if (yyparse() == 0) {
+        printQuad();
         printf("Parsing successful\n");
     } else {
         fprintf(stderr, "Parsing failed\n");
         return 1;
     }
 
-    printSymbolTable(&symbolTable);
-    freeSymbolTable(&symbolTable);
+    // printSymbolTable(&symbolTable);
+    // freeSymbolTable(&symbolTable);
     return 0;
 }
 
