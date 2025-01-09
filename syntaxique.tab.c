@@ -84,6 +84,15 @@ int currentColumn = 1;
 
 SymbolTable symbolTable;
 
+char* trimQuotes(char* str) {
+    size_t len = strlen(str);
+    if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
+        str[len - 1] = '\0';
+        return str + 1;
+    }
+    return str;
+}
+
 typedef struct {
     char* name;
     union {
@@ -95,8 +104,37 @@ typedef struct {
     DataType type;
 } AttributeValue;
 
+typedef struct quadruplet{
+char op[15];
+char opr1[15];
+char opr2[15];
+char res[15];
+}Quad;
 
-#line 100 "syntaxique.tab.c"
+Quad quad[1000];
+
+int sauv_fin_if[100];
+int sauv_fin_else[100];
+int sauv_begin_While[100];
+int sauv_while_condition[100];
+int top_fin_if = -1;
+int top_fin_else = -1;
+int top_begin_While = -1;
+int top_while_condition = -1;
+void push(int stack[], int *top, int value) {
+    stack[++(*top)] = value;
+}
+
+int pop(int stack[], int *top) {
+    if (*top == -1) {
+        fprintf(stderr, "Stack underflow\n");
+        exit(EXIT_FAILURE);
+    }
+    return stack[(*top)--];
+}
+
+
+#line 138 "syntaxique.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -586,13 +624,13 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    76,    76,    83,    84,    88,    88,    93,    93,    98,
-      98,   102,   102,   106,   107,   112,   117,   121,   125,   126,
-     129,   132,   135,   138,   139,   142,   145,   148,   151,   156,
-     166,   172,   177,   187,   192,   200,   200,   204,   208,   209,
-     213,   214,   215,   216,   220,   245,   248,   256,   262,   266,
-     267,   268,   272,   273,   274,   278,   279,   280,   283,   287,
-     290,   293,   296,   299,   302,   305
+       0,   117,   117,   124,   125,   129,   129,   134,   134,   139,
+     139,   143,   143,   147,   148,   153,   158,   162,   166,   167,
+     170,   173,   176,   179,   180,   183,   186,   189,   192,   197,
+     207,   213,   218,   228,   233,   241,   241,   245,   249,   250,
+     254,   255,   256,   257,   261,   271,   274,   282,   288,   292,
+     293,   294,   298,   299,   300,   304,   305,   306,   309,   313,
+     316,   319,   322,   325,   328,   331
 };
 #endif
 
@@ -1248,46 +1286,8 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* $@1: %empty  */
-#line 88 "syntaxique.y"
+#line 129 "syntaxique.y"
                                                                                      {
-        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_INTEGER);
-        int value = (yyvsp[-1].intVal);
-        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &value);
-    }
-#line 1258 "syntaxique.tab.c"
-    break;
-
-  case 7: /* $@2: %empty  */
-#line 93 "syntaxique.y"
-                                                                                           {
-        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_FLOAT);
-        float value = (float)(yyvsp[-1].intVal);
-        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &value);
-    }
-#line 1268 "syntaxique.tab.c"
-    break;
-
-  case 9: /* $@3: %empty  */
-#line 98 "syntaxique.y"
-                                                                                        {
-        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_STRING);
-        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &(yyvsp[-1].strVal));
-    }
-#line 1277 "syntaxique.tab.c"
-    break;
-
-  case 11: /* $@4: %empty  */
-#line 102 "syntaxique.y"
-                                                                                          {
-        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_BOOLEAN);
-        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &(yyvsp[-1].boolVal));
-    }
-#line 1286 "syntaxique.tab.c"
-    break;
-
-  case 14: /* declaration_list: TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE  */
-#line 107 "syntaxique.y"
-                                                                                       {
         addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_INTEGER);
         int value = (yyvsp[-1].intVal);
         updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &value);
@@ -1295,8 +1295,8 @@ yyreduce:
 #line 1296 "syntaxique.tab.c"
     break;
 
-  case 15: /* declaration_list: TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE  */
-#line 112 "syntaxique.y"
+  case 7: /* $@2: %empty  */
+#line 134 "syntaxique.y"
                                                                                            {
         addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_FLOAT);
         float value = (float)(yyvsp[-1].intVal);
@@ -1305,8 +1305,8 @@ yyreduce:
 #line 1306 "syntaxique.tab.c"
     break;
 
-  case 16: /* declaration_list: TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE  */
-#line 117 "syntaxique.y"
+  case 9: /* $@3: %empty  */
+#line 139 "syntaxique.y"
                                                                                         {
         addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_STRING);
         updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &(yyvsp[-1].strVal));
@@ -1314,8 +1314,8 @@ yyreduce:
 #line 1315 "syntaxique.tab.c"
     break;
 
-  case 17: /* declaration_list: TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE  */
-#line 121 "syntaxique.y"
+  case 11: /* $@4: %empty  */
+#line 143 "syntaxique.y"
                                                                                           {
         addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_BOOLEAN);
         updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &(yyvsp[-1].boolVal));
@@ -1323,75 +1323,113 @@ yyreduce:
 #line 1324 "syntaxique.tab.c"
     break;
 
+  case 14: /* declaration_list: TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE  */
+#line 148 "syntaxique.y"
+                                                                                       {
+        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_INTEGER);
+        int value = (yyvsp[-1].intVal);
+        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &value);
+    }
+#line 1334 "syntaxique.tab.c"
+    break;
+
+  case 15: /* declaration_list: TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE  */
+#line 153 "syntaxique.y"
+                                                                                           {
+        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_FLOAT);
+        float value = (float)(yyvsp[-1].intVal);
+        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &value);
+    }
+#line 1344 "syntaxique.tab.c"
+    break;
+
+  case 16: /* declaration_list: TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE  */
+#line 158 "syntaxique.y"
+                                                                                        {
+        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_STRING);
+        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &(yyvsp[-1].strVal));
+    }
+#line 1353 "syntaxique.tab.c"
+    break;
+
+  case 17: /* declaration_list: TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE  */
+#line 162 "syntaxique.y"
+                                                                                          {
+        addSymbol(&symbolTable, (yyvsp[-3].attr).name, TYPE_BOOLEAN);
+        updateSymbolValue(&symbolTable, (yyvsp[-3].attr).name, &(yyvsp[-1].boolVal));
+    }
+#line 1362 "syntaxique.tab.c"
+    break;
+
   case 19: /* declaration_list: TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list  */
-#line 126 "syntaxique.y"
+#line 167 "syntaxique.y"
                                                                            {
         addSymbol(&symbolTable, (yyvsp[-2].attr).name, TYPE_INTEGER);
     }
-#line 1332 "syntaxique.tab.c"
+#line 1370 "syntaxique.tab.c"
     break;
 
   case 20: /* declaration_list: TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list  */
-#line 129 "syntaxique.y"
+#line 170 "syntaxique.y"
                                                                              {
         addSymbol(&symbolTable, (yyvsp[-2].attr).name, TYPE_FLOAT);
     }
-#line 1340 "syntaxique.tab.c"
+#line 1378 "syntaxique.tab.c"
     break;
 
   case 21: /* declaration_list: TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list  */
-#line 132 "syntaxique.y"
+#line 173 "syntaxique.y"
                                                                               {
         addSymbol(&symbolTable, (yyvsp[-2].attr).name, TYPE_STRING);
     }
-#line 1348 "syntaxique.tab.c"
+#line 1386 "syntaxique.tab.c"
     break;
 
   case 22: /* declaration_list: TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list  */
-#line 135 "syntaxique.y"
+#line 176 "syntaxique.y"
                                                                                {
         addSymbol(&symbolTable, (yyvsp[-2].attr).name, TYPE_BOOLEAN);
     }
-#line 1356 "syntaxique.tab.c"
+#line 1394 "syntaxique.tab.c"
     break;
 
   case 24: /* declaration_list: TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG  */
-#line 139 "syntaxique.y"
+#line 180 "syntaxique.y"
                                                           {
         addSymbol(&symbolTable, (yyvsp[-1].attr).name, TYPE_INTEGER);
     }
-#line 1364 "syntaxique.tab.c"
+#line 1402 "syntaxique.tab.c"
     break;
 
   case 25: /* declaration_list: TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG  */
-#line 142 "syntaxique.y"
+#line 183 "syntaxique.y"
                                                             {
         addSymbol(&symbolTable, (yyvsp[-1].attr).name, TYPE_FLOAT);
     }
-#line 1372 "syntaxique.tab.c"
+#line 1410 "syntaxique.tab.c"
     break;
 
   case 26: /* declaration_list: TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG  */
-#line 145 "syntaxique.y"
+#line 186 "syntaxique.y"
                                                              {
         addSymbol(&symbolTable, (yyvsp[-1].attr).name, TYPE_STRING);
     }
-#line 1380 "syntaxique.tab.c"
+#line 1418 "syntaxique.tab.c"
     break;
 
   case 27: /* declaration_list: TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG  */
-#line 148 "syntaxique.y"
+#line 189 "syntaxique.y"
                                                               {
         addSymbol(&symbolTable, (yyvsp[-1].attr).name, TYPE_BOOLEAN);
     }
-#line 1388 "syntaxique.tab.c"
+#line 1426 "syntaxique.tab.c"
     break;
 
   case 29: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING attributes  */
-#line 156 "syntaxique.y"
+#line 197 "syntaxique.y"
                                                        {
         if (strcmp((yyvsp[-3].strVal),"name")==0){
-        (yyval.attr).name = strdup((yyvsp[-1].strVal));  // this is the variable name
+        (yyval.attr).name = strdup(trimQuotes((yyvsp[-1].strVal)));  // this is the variable name
         (yyval.attr).type = TYPE_STRING;
         }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
         (yyval.attr).name = strdup((yyvsp[-3].strVal));
@@ -1399,35 +1437,35 @@ yyreduce:
         (yyval.attr).type = TYPE_STRING;
         }
     }
-#line 1403 "syntaxique.tab.c"
+#line 1441 "syntaxique.tab.c"
     break;
 
   case 30: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes  */
-#line 166 "syntaxique.y"
+#line 207 "syntaxique.y"
                                                                                                              {
         //this is to get just the value of the attribute and its name
         (yyval.attr).name = strdup((yyvsp[-5].strVal));
         (yyval.attr).value.intVal = (yyvsp[-2].intVal);  
         (yyval.attr).type = TYPE_INTEGER;
     }
-#line 1414 "syntaxique.tab.c"
+#line 1452 "syntaxique.tab.c"
     break;
 
   case 31: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes  */
-#line 172 "syntaxique.y"
+#line 213 "syntaxique.y"
                                                                                                         {
         (yyval.attr).name = strdup((yyvsp[-5].strVal));
         (yyval.attr).value.boolVal = (yyvsp[-2].boolVal);  
         (yyval.attr).type = TYPE_BOOLEAN;
     }
-#line 1424 "syntaxique.tab.c"
+#line 1462 "syntaxique.tab.c"
     break;
 
   case 32: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING  */
-#line 177 "syntaxique.y"
+#line 218 "syntaxique.y"
                                               {
         if (strcmp((yyvsp[-2].strVal),"name")==0){
-        (yyval.attr).name = strdup((yyvsp[0].strVal));  // this is the variable name
+        (yyval.attr).name = strdup(trimQuotes((yyvsp[0].strVal)));  // this is the variable name
         (yyval.attr).type = TYPE_STRING;
         }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
         (yyval.attr).name = strdup((yyvsp[-2].strVal));
@@ -1435,156 +1473,141 @@ yyreduce:
         (yyval.attr).type = TYPE_STRING;
         }
     }
-#line 1439 "syntaxique.tab.c"
+#line 1477 "syntaxique.tab.c"
     break;
 
   case 33: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS  */
-#line 187 "syntaxique.y"
+#line 228 "syntaxique.y"
                                                                                                   {
         (yyval.attr).name = strdup((yyvsp[-4].strVal));
         (yyval.attr).value.intVal = (yyvsp[-1].intVal);  
         (yyval.attr).type = TYPE_INTEGER;
     }
-#line 1449 "syntaxique.tab.c"
+#line 1487 "syntaxique.tab.c"
     break;
 
   case 34: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS  */
-#line 192 "syntaxique.y"
+#line 233 "syntaxique.y"
                                                                                              {
         (yyval.attr).name = strdup((yyvsp[-4].strVal));
         (yyval.attr).value.boolVal = (yyvsp[-1].boolVal);  
         (yyval.attr).type = TYPE_BOOLEAN;
     }
-#line 1459 "syntaxique.tab.c"
+#line 1497 "syntaxique.tab.c"
     break;
 
   case 44: /* assignment: TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG  */
-#line 220 "syntaxique.y"
-                                                       {
+#line 261 "syntaxique.y"
+                                                        {
         //update the value of a variable
         SymbolEntry* entry = findSymbol(&symbolTable, (yyvsp[-1].attr).name);
         if (!entry) {
             yyerror("Variable undefined");
-        } else {
-            switch (entry->type) {
-                case TYPE_INTEGER:
-                    updateSymbolValue(&symbolTable, (yyvsp[-1].attr).name, &((yyvsp[-1].attr).value.intVal));
-                    break;
-                case TYPE_FLOAT:
-                    updateSymbolValue(&symbolTable, (yyvsp[-1].attr).name, &((yyvsp[-1].attr).value.floatVal));
-                    break;
-                case TYPE_STRING:
-                    updateSymbolValue(&symbolTable, (yyvsp[-1].attr).name, &((yyvsp[-1].attr).value.strVal));
-                    break;
-                case TYPE_BOOLEAN:
-                    updateSymbolValue(&symbolTable, (yyvsp[-1].attr).name, &((yyvsp[-1].attr).value.boolVal));
-                    break;
-            }
-        }
-    }
-#line 1486 "syntaxique.tab.c"
+        } 
+}
+#line 1509 "syntaxique.tab.c"
     break;
 
   case 50: /* expr_arithmetique: expr_arithmetique TOKEN_PLUS terme  */
-#line 267 "syntaxique.y"
+#line 293 "syntaxique.y"
                                         { (yyval.intVal) = (yyvsp[-2].intVal) + (yyvsp[0].intVal); }
-#line 1492 "syntaxique.tab.c"
+#line 1515 "syntaxique.tab.c"
     break;
 
   case 51: /* expr_arithmetique: expr_arithmetique TOKEN_MINUS terme  */
-#line 268 "syntaxique.y"
+#line 294 "syntaxique.y"
                                          { (yyval.intVal) = (yyvsp[-2].intVal) - (yyvsp[0].intVal); }
-#line 1498 "syntaxique.tab.c"
+#line 1521 "syntaxique.tab.c"
     break;
 
   case 53: /* terme: terme TOKEN_MULTIPLY facteur  */
-#line 273 "syntaxique.y"
+#line 299 "syntaxique.y"
                                   { (yyval.intVal) = (yyvsp[-2].intVal) * (yyvsp[0].intVal); }
-#line 1504 "syntaxique.tab.c"
+#line 1527 "syntaxique.tab.c"
     break;
 
   case 54: /* terme: terme TOKEN_DIVIDE facteur  */
-#line 274 "syntaxique.y"
+#line 300 "syntaxique.y"
                                 { (yyval.intVal) = (yyvsp[-2].intVal) / (yyvsp[0].intVal); }
-#line 1510 "syntaxique.tab.c"
+#line 1533 "syntaxique.tab.c"
     break;
 
   case 55: /* facteur: TOKEN_INT  */
-#line 278 "syntaxique.y"
+#line 304 "syntaxique.y"
              { (yyval.intVal) = (yyvsp[0].intVal); }
-#line 1516 "syntaxique.tab.c"
+#line 1539 "syntaxique.tab.c"
     break;
 
   case 56: /* facteur: TOKEN_FLOAT  */
-#line 279 "syntaxique.y"
+#line 305 "syntaxique.y"
                  { (yyval.intVal) = (int)(yyvsp[0].floatVal); }
-#line 1522 "syntaxique.tab.c"
+#line 1545 "syntaxique.tab.c"
     break;
 
   case 57: /* facteur: IDENTIFICATEUR  */
-#line 280 "syntaxique.y"
+#line 306 "syntaxique.y"
                     {
         (yyval.intVal)=1;
     }
-#line 1530 "syntaxique.tab.c"
+#line 1553 "syntaxique.tab.c"
     break;
 
   case 58: /* facteur: TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS  */
-#line 283 "syntaxique.y"
+#line 309 "syntaxique.y"
                                                                       { (yyval.intVal) = (yyvsp[-1].intVal); }
-#line 1536 "syntaxique.tab.c"
+#line 1559 "syntaxique.tab.c"
     break;
 
   case 59: /* expr_logique: expr_arithmetique TOKEN_EQUAL expr_arithmetique  */
-#line 287 "syntaxique.y"
+#line 313 "syntaxique.y"
                                                    {
     (yyval.boolVal) = ((yyvsp[-2].intVal) == (yyvsp[0].intVal)); 
   }
-#line 1544 "syntaxique.tab.c"
+#line 1567 "syntaxique.tab.c"
     break;
 
   case 60: /* expr_logique: expr_arithmetique TOKEN_GREATER_THAN expr_arithmetique  */
-#line 290 "syntaxique.y"
+#line 316 "syntaxique.y"
                                                             {
     (yyval.boolVal) = ((yyvsp[-2].intVal) > (yyvsp[0].intVal));
   }
-#line 1552 "syntaxique.tab.c"
+#line 1575 "syntaxique.tab.c"
     break;
 
   case 61: /* expr_logique: expr_arithmetique TOKEN_LOWER_THAN expr_arithmetique  */
-#line 293 "syntaxique.y"
+#line 319 "syntaxique.y"
                                                           {
     (yyval.boolVal) = ((yyvsp[-2].intVal) < (yyvsp[0].intVal)); 
   }
-#line 1560 "syntaxique.tab.c"
+#line 1583 "syntaxique.tab.c"
     break;
 
   case 62: /* expr_logique: expr_arithmetique TOKEN_GREATER_OR_EQUAL expr_arithmetique  */
-#line 296 "syntaxique.y"
+#line 322 "syntaxique.y"
                                                                  {
     (yyval.boolVal) = ((yyvsp[-2].intVal) >= (yyvsp[0].intVal)); 
   }
-#line 1568 "syntaxique.tab.c"
+#line 1591 "syntaxique.tab.c"
     break;
 
   case 63: /* expr_logique: expr_arithmetique TOKEN_LOWER_OR_EQUAL expr_arithmetique  */
-#line 299 "syntaxique.y"
+#line 325 "syntaxique.y"
                                                               {
     (yyval.boolVal) = ((yyvsp[-2].intVal) <= (yyvsp[0].intVal)); 
   }
-#line 1576 "syntaxique.tab.c"
+#line 1599 "syntaxique.tab.c"
     break;
 
   case 64: /* expr_logique: TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS  */
-#line 302 "syntaxique.y"
+#line 328 "syntaxique.y"
                                                                  {
     (yyval.boolVal) = (yyvsp[-1].boolVal) ; 
   }
-#line 1584 "syntaxique.tab.c"
+#line 1607 "syntaxique.tab.c"
     break;
 
 
-#line 1588 "syntaxique.tab.c"
+#line 1611 "syntaxique.tab.c"
 
       default: break;
     }
@@ -1777,7 +1800,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 308 "syntaxique.y"
+#line 334 "syntaxique.y"
 
 
 void yysuccess(char *s){

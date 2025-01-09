@@ -10,7 +10,6 @@
         
         <while condition=(counter >> 0)>
             <print value="Counter: + counter"/>
-            <assign counter=(counter - 1)/>
         </while>
         
         <if condition=(counter == 0)>

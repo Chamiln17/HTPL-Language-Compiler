@@ -15,6 +15,15 @@ int currentColumn = 1;
 
 SymbolTable symbolTable;
 
+char* trimQuotes(char* str) {
+    size_t len = strlen(str);
+    if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
+        str[len - 1] = '\0';
+        return str + 1;
+    }
+    return str;
+}
+
 typedef struct {
     char* name;
     union {
@@ -26,6 +35,38 @@ typedef struct {
     DataType type;
 } AttributeValue;
 
+int QC=0;
+int ti=0;
+
+typedef struct quadruplet{
+char op[15];
+char opr1[15];
+char opr2[15];
+char res[15];
+}Quad;
+
+Quad quad[1000];
+
+int sauv_fin_if[100];
+int sauv_fin_else[100];
+int sauv_begin_While[100];
+int sauv_while_condition[100];
+int top_fin_if = -1;
+int top_fin_else = -1;
+int top_begin_While = -1;
+int top_while_condition = -1;
+void push(int stack[], int *top, int value) {
+    stack[++(*top)] = value;
+}
+
+int pop(int stack[], int *top) {
+    if (*top == -1) {
+        fprintf(stderr, "Stack underflow\n");
+        exit(EXIT_FAILURE);
+    }
+    return stack[(*top)--];
+}
+
 %}
 %union {
     int intVal;
@@ -34,6 +75,9 @@ typedef struct {
     bool boolVal;
     AttributeValue attr;
 }
+
+
+
 
 
 
@@ -89,94 +133,174 @@ declaration_list:
         addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
         int value = $4;
         updateSymbolValue(&symbolTable, $2.name, &value);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     } declaration_list
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
         addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
         float value = (float)$4;
         updateSymbolValue(&symbolTable, $2.name, &value);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     } declaration_list
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
         addSymbol(&symbolTable, $2.name, TYPE_STRING);
         updateSymbolValue(&symbolTable, $2.name, &$4);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     } declaration_list
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
         addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
         updateSymbolValue(&symbolTable, $2.name, &$4);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     } declaration_list
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE declaration_list
    | TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
         addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
         int value = $4;
         updateSymbolValue(&symbolTable, $2.name, &value);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
         addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
         float value = (float)$4;
         updateSymbolValue(&symbolTable, $2.name, &value);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
         addSymbol(&symbolTable, $2.name, TYPE_STRING);
         updateSymbolValue(&symbolTable, $2.name, &$4);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
         addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
         updateSymbolValue(&symbolTable, $2.name, &$4);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = $4;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE
    | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
         addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = 0;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
         addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = 0;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
         addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = "";
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
         addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = "true";
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
    | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = 0;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = 0;
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = "";
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        quad[QC].op = ":=";
+        quad[QC].opr1 = "true";
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
     }
-   | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG
-   ;
-   
+    | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG
+    ;
+
 
 attributes:
    IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING attributes {
         if (strcmp($1,"name")==0){
-        $$.name = strdup($3);  // this is the variable name
+        $$.name = strdup(trimQuotes($3));  // this is the variable name
         $$.type = TYPE_STRING;
         }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
         $$.name = strdup($1);
         $$.value.strVal = strdup($3);  
         $$.type = TYPE_STRING;
         }
-    } 
+    }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes {
         //this is to get just the value of the attribute and its name
         $$.name = strdup($1);
         $$.value.intVal = $4;  
         $$.type = TYPE_INTEGER;
-    } 
+    }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes {
         $$.name = strdup($1);
         $$.value.boolVal = $4;  
         $$.type = TYPE_BOOLEAN;
-    } 
+    }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING {
         if (strcmp($1,"name")==0){
-        $$.name = strdup($3);  // this is the variable name
+        $$.name = strdup(trimQuotes($3));  // this is the variable name
         $$.type = TYPE_STRING;
         }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
         $$.name = strdup($1);
@@ -201,14 +325,8 @@ elements:
    ;
 
 element:
-<<<<<<< HEAD
    TOKEN_ELEMENT_OPEN attributes TOKEN_SELF_CLOSING_TAG
    ;
-=======
-   TOKEN_ELEMENT_OPEN IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS TOKEN_SELF_CLOSING_TAG
-
-
->>>>>>> fc3480aee0e85cc791e1baa397c14f0ed2cdc726
 
 instruction_list:
    instruction_list instruction
@@ -223,34 +341,32 @@ instruction:
    ;
 
 assignment:
-   TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
+    TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         //update the value of a variable
         SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
         if (!entry) {
             yyerror("Variable undefined");
-        } else {
-            switch (entry->type) {
-                case TYPE_INTEGER:
-                    updateSymbolValue(&symbolTable, $2.name, &($2.value.intVal));
-                    break;
-                case TYPE_FLOAT:
-                    updateSymbolValue(&symbolTable, $2.name, &($2.value.floatVal));
-                    break;
-                case TYPE_STRING:
-                    updateSymbolValue(&symbolTable, $2.name, &($2.value.strVal));
-                    break;
-                case TYPE_BOOLEAN:
-                    updateSymbolValue(&symbolTable, $2.name, &($2.value.boolVal));
-                    break;
-            }
         }
-    }
-   ;
+        if (entry->type == TYPE_INTEGER) {
+            quad[QC].opr1 = $2.value.intVal;
+        } else if (entry->type == TYPE_FLOAT) {
+            quad[QC].opr1 = $2.value.floatVal;
+        } else if (entry->type == TYPE_STRING) {
+            quad[QC].opr1 = $2.value.strVal;
+        } else if (entry->type == TYPE_BOOLEAN) {
+            quad[QC].opr1 = $2.value.boolVal ? "true" : "false";
+        }
+        quad[QC].op = ":=";
+        quad[QC].opr2 = "";
+        quad[QC].res = $2.name;
+        QC++;
+}
+;
 
 if_statement:
    TOKEN_IF_OPEN attributes TOKEN_END_TAG 
    instruction_list 
-   TOKEN_IF_CLOSE
+   TOKEN_IF_CLOSE 
    | TOKEN_IF_OPEN attributes TOKEN_END_TAG  
    instruction_list 
    TOKEN_ELSE 
