@@ -145,68 +145,80 @@ variables_list:
 
 declaration_list:
    TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        // int value = $4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
-        printf("Declaration:" );
-        printf("Name: %s\n", $4);
+        
+        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
         char temp[15];
         sprintf(temp, "%s", $4);
+
+        if (!isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for integer variable");
+        }
         createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        // float value = (float)$4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
         char temp[15];
         sprintf(temp, "%s", $4);
+        if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for float variable");
+        }
         createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
         char temp[15];
         sprintf(temp, "%s", $4);
+        if (!isString(temp)) {
+            yyerror("Invalid value for string variable");
+        }
         createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
         char temp[15];
         sprintf(temp, "%s", $4);
+        if (!isBoolean(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for boolean variable");
+        }
         createQuad(":=", temp, "", $2.name);
     } declaration_list
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE declaration_list
    | TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        // int value = $4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
+        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
         printf("Declaration:" );
         printf("Name: %s\n", $4);
         char temp[15];
         sprintf(temp, "%s", $4);
+        if (!isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for integer variable");
+        }
         createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        // float value = (float)$4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
         char temp[15];
         sprintf(temp, "%s", $4);
+        if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for float variable");
+        }
         createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
         char temp[15];
         sprintf(temp, "%s", $4);
+        if (!isString(temp)) {
+            yyerror("Invalid value for string variable");
+        }
         createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
         char temp[15];
         sprintf(temp, "%s", $4);
+        if (!isBoolean(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for boolean variable");
+        }
         createQuad(":=", temp, "", $2.name);
     }
    | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE
@@ -214,34 +226,34 @@ declaration_list:
         createQuad(":=", "0", "", $2.name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
         createQuad(":=", "0.0", "", $2.name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
         createQuad(":=", "", "", $2.name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
         
         createQuad(":=", "0", "", $2.name);
     }
    | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
    | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
         createQuad(":=", "0", "", $2.name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
         
         createQuad(":=", "0.0", "", $2.name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        addSymbol(&symbolTable, $2.name, TYPE_STRING);
         createQuad(":=", "", "", $2.name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
         createQuad(":=", "0", "", $2.name);
     }
     | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG
@@ -315,21 +327,29 @@ instruction:
 assignment:
     TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         //update the value of a variable
-        // SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
-        // if (!entry) {
-        //     yyerror("Variable undefined");
-        // }
+        SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
+        if (!entry) {
+            yyerror("Variable undefined");
+        }
         char temp[15];
         sprintf(temp, "%s", $2.value);
-        // if (entry->type == TYPE_INTEGER) {
-        //     sprintf(temp, "%d", $2.value);
-        // } else if (entry->type == TYPE_FLOAT) {
-        //     sprintf(temp, "%f", $2.value);
-        // } else if (entry->type == TYPE_STRING) {
-        //     sprintf(temp, "%s", $2.value);
-        // } else if (entry->type == TYPE_BOOLEAN) {
-        //     sprintf(temp, "%d", $2.value);
-        // }
+        if (entry->type == TYPE_INTEGER) {
+            if (!isInteger(temp) && !isVariable(temp)) {
+                yyerror("Invalid value for integer variable");
+            }
+        } else if (entry->type == TYPE_FLOAT) {
+            if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
+                yyerror("Invalid value for float variable");
+            }
+        } else if (entry->type == TYPE_STRING) {
+            if (!isString(temp)) {
+                yyerror("Invalid value for string variable");
+            }
+        } else if (entry->type == TYPE_BOOLEAN) {
+            if (!isBoolean(temp) && !isVariable(temp)) {
+                yyerror("Invalid value for boolean variable");
+            }
+        } 
         createQuad(":=", temp, "", $2.name);
 }
 ;
@@ -559,6 +579,7 @@ void yysuccess(char *s){
 
 void yyerror(const char *s) {
     fprintf(stdout, "File output, line %d, character %d :  %s \n", yylineno, currentColumn, s);
+    exit(1);
 }
 
 int main(void) {
@@ -571,8 +592,8 @@ int main(void) {
         return 1;
     }
 
-    // printSymbolTable(&symbolTable);
-    // freeSymbolTable(&symbolTable);
+    printSymbolTable(&symbolTable);
+    freeSymbolTable(&symbolTable);
     return 0;
 }
 

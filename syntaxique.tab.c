@@ -617,13 +617,13 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   135,   135,   142,   143,   147,   147,   157,   157,   165,
-     165,   172,   172,   179,   180,   190,   198,   205,   212,   213,
-     216,   220,   224,   229,   230,   234,   239,   243,   247,   252,
-     262,   268,   273,   283,   288,   296,   296,   300,   304,   305,
-     309,   310,   311,   312,   316,   340,   340,   346,   345,   364,
-     377,   393,   407,   411,   417,   427,   438,   447,   454,   464,
-     473,   480,   486,   496,   507,   515,   524,   533,   542,   545
+       0,   135,   135,   142,   143,   147,   147,   158,   158,   167,
+     167,   176,   176,   185,   186,   197,   206,   215,   224,   225,
+     228,   232,   236,   241,   242,   246,   251,   255,   259,   264,
+     274,   280,   285,   295,   300,   308,   308,   312,   316,   317,
+     321,   322,   323,   324,   328,   360,   360,   366,   365,   384,
+     397,   413,   427,   431,   437,   447,   458,   467,   474,   484,
+     493,   500,   506,   516,   527,   535,   544,   553,   562,   565
 };
 #endif
 
@@ -1632,166 +1632,178 @@ yyreduce:
         case 5:
 #line 147 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        // int value = $4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
-        printf("Declaration:" );
-        printf("Name: %s\n", (yyvsp[(4) - (5)].strVal));
+        
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_INTEGER);
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+
+        if (!isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for integer variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 7:
-#line 157 "syntaxique.y"
+#line 158 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        // float value = (float)$4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_FLOAT);
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+        if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for float variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 9:
-#line 165 "syntaxique.y"
+#line 167 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_STRING);
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+        if (!isString(temp)) {
+            yyerror("Invalid value for string variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 11:
-#line 172 "syntaxique.y"
+#line 176 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_BOOLEAN);
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+        if (!isBoolean(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for boolean variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 14:
-#line 180 "syntaxique.y"
+#line 186 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        // int value = $4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_INTEGER);
         printf("Declaration:" );
         printf("Name: %s\n", (yyvsp[(4) - (5)].strVal));
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+        if (!isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for integer variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 15:
-#line 190 "syntaxique.y"
+#line 197 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        // float value = (float)$4;
-        //updateSymbolValue(&symbolTable, $2.name, &value);
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_FLOAT);
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+        if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for float variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 16:
-#line 198 "syntaxique.y"
+#line 206 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_STRING);
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+        if (!isString(temp)) {
+            yyerror("Invalid value for string variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 17:
-#line 205 "syntaxique.y"
+#line 215 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        //updateSymbolValue(&symbolTable, $2.name, &$4);
+        addSymbol(&symbolTable, (yyvsp[(2) - (5)].attr).name, TYPE_BOOLEAN);
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(4) - (5)].strVal));
+        if (!isBoolean(temp) && !isVariable(temp)) {
+            yyerror("Invalid value for boolean variable");
+        }
         createQuad(":=", temp, "", (yyvsp[(2) - (5)].attr).name);
     ;}
     break;
 
   case 19:
-#line 213 "syntaxique.y"
+#line 225 "syntaxique.y"
     {
         createQuad(":=", "0", "", (yyvsp[(2) - (4)].attr).name);
     ;}
     break;
 
   case 20:
-#line 216 "syntaxique.y"
+#line 228 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        addSymbol(&symbolTable, (yyvsp[(2) - (4)].attr).name, TYPE_FLOAT);
         createQuad(":=", "0.0", "", (yyvsp[(2) - (4)].attr).name);
     ;}
     break;
 
   case 21:
-#line 220 "syntaxique.y"
+#line 232 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        addSymbol(&symbolTable, (yyvsp[(2) - (4)].attr).name, TYPE_STRING);
         createQuad(":=", "", "", (yyvsp[(2) - (4)].attr).name);
     ;}
     break;
 
   case 22:
-#line 224 "syntaxique.y"
+#line 236 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        addSymbol(&symbolTable, (yyvsp[(2) - (4)].attr).name, TYPE_BOOLEAN);
         
         createQuad(":=", "0", "", (yyvsp[(2) - (4)].attr).name);
     ;}
     break;
 
   case 24:
-#line 230 "syntaxique.y"
+#line 242 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        addSymbol(&symbolTable, (yyvsp[(2) - (3)].attr).name, TYPE_INTEGER);
         createQuad(":=", "0", "", (yyvsp[(2) - (3)].attr).name);
     ;}
     break;
 
   case 25:
-#line 234 "syntaxique.y"
+#line 246 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        addSymbol(&symbolTable, (yyvsp[(2) - (3)].attr).name, TYPE_FLOAT);
         
         createQuad(":=", "0.0", "", (yyvsp[(2) - (3)].attr).name);
     ;}
     break;
 
   case 26:
-#line 239 "syntaxique.y"
+#line 251 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        addSymbol(&symbolTable, (yyvsp[(2) - (3)].attr).name, TYPE_STRING);
         createQuad(":=", "", "", (yyvsp[(2) - (3)].attr).name);
     ;}
     break;
 
   case 27:
-#line 243 "syntaxique.y"
+#line 255 "syntaxique.y"
     {
-        //addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        addSymbol(&symbolTable, (yyvsp[(2) - (3)].attr).name, TYPE_BOOLEAN);
         createQuad(":=", "0", "", (yyvsp[(2) - (3)].attr).name);
     ;}
     break;
 
   case 29:
-#line 252 "syntaxique.y"
+#line 264 "syntaxique.y"
     {
         if (strcmp((yyvsp[(1) - (4)].strVal),"name")==0){
         (yyval.attr).name = strdup(trimQuotes((yyvsp[(3) - (4)].strVal)));  // this is the variable name
@@ -1805,7 +1817,7 @@ yyreduce:
     break;
 
   case 30:
-#line 262 "syntaxique.y"
+#line 274 "syntaxique.y"
     {
         //this is to get just the value of the attribute and its name
         (yyval.attr).name = strdup((yyvsp[(1) - (6)].strVal));
@@ -1815,7 +1827,7 @@ yyreduce:
     break;
 
   case 31:
-#line 268 "syntaxique.y"
+#line 280 "syntaxique.y"
     {
         (yyval.attr).name = strdup((yyvsp[(1) - (6)].strVal));
         (yyval.attr).value = (yyvsp[(4) - (6)].strVal);  
@@ -1824,7 +1836,7 @@ yyreduce:
     break;
 
   case 32:
-#line 273 "syntaxique.y"
+#line 285 "syntaxique.y"
     {
         if (strcmp((yyvsp[(1) - (3)].strVal),"name")==0){
         (yyval.attr).name = strdup(trimQuotes((yyvsp[(3) - (3)].strVal)));  // this is the variable name
@@ -1838,7 +1850,7 @@ yyreduce:
     break;
 
   case 33:
-#line 283 "syntaxique.y"
+#line 295 "syntaxique.y"
     {
         (yyval.attr).name = strdup((yyvsp[(1) - (5)].strVal));
         (yyval.attr).value = (yyvsp[(4) - (5)].strVal);  
@@ -1847,7 +1859,7 @@ yyreduce:
     break;
 
   case 34:
-#line 288 "syntaxique.y"
+#line 300 "syntaxique.y"
     {
         (yyval.attr).name = strdup((yyvsp[(1) - (5)].strVal));
         (yyval.attr).value = (yyvsp[(4) - (5)].strVal);  
@@ -1856,30 +1868,38 @@ yyreduce:
     break;
 
   case 44:
-#line 316 "syntaxique.y"
+#line 328 "syntaxique.y"
     {
         //update the value of a variable
-        // SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
-        // if (!entry) {
-        //     yyerror("Variable undefined");
-        // }
+        SymbolEntry* entry = findSymbol(&symbolTable, (yyvsp[(2) - (3)].attr).name);
+        if (!entry) {
+            yyerror("Variable undefined");
+        }
         char temp[15];
         sprintf(temp, "%s", (yyvsp[(2) - (3)].attr).value);
-        // if (entry->type == TYPE_INTEGER) {
-        //     sprintf(temp, "%d", $2.value);
-        // } else if (entry->type == TYPE_FLOAT) {
-        //     sprintf(temp, "%f", $2.value);
-        // } else if (entry->type == TYPE_STRING) {
-        //     sprintf(temp, "%s", $2.value);
-        // } else if (entry->type == TYPE_BOOLEAN) {
-        //     sprintf(temp, "%d", $2.value);
-        // }
+        if (entry->type == TYPE_INTEGER) {
+            if (!isInteger(temp) && !isVariable(temp)) {
+                yyerror("Invalid value for integer variable");
+            }
+        } else if (entry->type == TYPE_FLOAT) {
+            if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
+                yyerror("Invalid value for float variable");
+            }
+        } else if (entry->type == TYPE_STRING) {
+            if (!isString(temp)) {
+                yyerror("Invalid value for string variable");
+            }
+        } else if (entry->type == TYPE_BOOLEAN) {
+            if (!isBoolean(temp) && !isVariable(temp)) {
+                yyerror("Invalid value for boolean variable");
+            }
+        } 
         createQuad(":=", temp, "", (yyvsp[(2) - (3)].attr).name);
 ;}
     break;
 
   case 45:
-#line 340 "syntaxique.y"
+#line 360 "syntaxique.y"
     {
     char temp[15];
     sprintf(temp, "%d", QC);
@@ -1888,7 +1908,7 @@ yyreduce:
     break;
 
   case 47:
-#line 346 "syntaxique.y"
+#line 366 "syntaxique.y"
     {
 
     sauv_fin_if[++top_fin_if] = QC;
@@ -1901,7 +1921,7 @@ yyreduce:
     break;
 
   case 48:
-#line 357 "syntaxique.y"
+#line 377 "syntaxique.y"
     {
     char temp[15];
     sprintf(temp, "%d", QC);
@@ -1910,7 +1930,7 @@ yyreduce:
     break;
 
   case 49:
-#line 364 "syntaxique.y"
+#line 384 "syntaxique.y"
     {
 
     if (strcmp((yyvsp[(2) - (2)].attr).name, "condition") == 0) {
@@ -1925,7 +1945,7 @@ yyreduce:
     break;
 
   case 50:
-#line 379 "syntaxique.y"
+#line 399 "syntaxique.y"
     {
     int begin_while = sauv_begin_While[top_begin_While--];
     char temp[15];
@@ -1941,7 +1961,7 @@ yyreduce:
     break;
 
   case 51:
-#line 393 "syntaxique.y"
+#line 413 "syntaxique.y"
     {
 
     if (strcmp((yyvsp[(2) - (2)].attr).name, "condition") == 0) {
@@ -1957,7 +1977,7 @@ yyreduce:
     break;
 
   case 53:
-#line 411 "syntaxique.y"
+#line 431 "syntaxique.y"
     {
     char temp[15];
     sprintf(temp, "%s", (yyvsp[(1) - (1)].strVal));
@@ -1967,7 +1987,7 @@ yyreduce:
     break;
 
   case 54:
-#line 417 "syntaxique.y"
+#line 437 "syntaxique.y"
     {
     char temp[15];
     char opr1[15];
@@ -1981,7 +2001,7 @@ yyreduce:
     break;
 
   case 55:
-#line 427 "syntaxique.y"
+#line 447 "syntaxique.y"
     { 
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -1993,7 +2013,7 @@ yyreduce:
     break;
 
   case 56:
-#line 438 "syntaxique.y"
+#line 458 "syntaxique.y"
     {
     
     // strcpy($$, $1);
@@ -2006,7 +2026,7 @@ yyreduce:
     break;
 
   case 57:
-#line 447 "syntaxique.y"
+#line 467 "syntaxique.y"
     { 
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2017,7 +2037,7 @@ yyreduce:
     break;
 
   case 58:
-#line 454 "syntaxique.y"
+#line 474 "syntaxique.y"
     {
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2028,7 +2048,7 @@ yyreduce:
     break;
 
   case 59:
-#line 464 "syntaxique.y"
+#line 484 "syntaxique.y"
     { 
 
     // printf("heloo");
@@ -2041,7 +2061,7 @@ yyreduce:
     break;
 
   case 60:
-#line 473 "syntaxique.y"
+#line 493 "syntaxique.y"
     { 
 
     char temp[15];
@@ -2052,7 +2072,7 @@ yyreduce:
     break;
 
   case 61:
-#line 480 "syntaxique.y"
+#line 500 "syntaxique.y"
     {
     char temp[15];
     sprintf(temp, "%s", (yyvsp[(1) - (1)].strVal));
@@ -2062,7 +2082,7 @@ yyreduce:
     break;
 
   case 62:
-#line 486 "syntaxique.y"
+#line 506 "syntaxique.y"
     {
     // $$ = $2
         char temp[15];
@@ -2073,7 +2093,7 @@ yyreduce:
     break;
 
   case 63:
-#line 496 "syntaxique.y"
+#line 516 "syntaxique.y"
     {
 
     
@@ -2088,7 +2108,7 @@ yyreduce:
     break;
 
   case 64:
-#line 507 "syntaxique.y"
+#line 527 "syntaxique.y"
     {
 
     
@@ -2100,7 +2120,7 @@ yyreduce:
     break;
 
   case 65:
-#line 515 "syntaxique.y"
+#line 535 "syntaxique.y"
     {
 
     char tmp3[15];
@@ -2113,7 +2133,7 @@ yyreduce:
     break;
 
   case 66:
-#line 524 "syntaxique.y"
+#line 544 "syntaxique.y"
     {
 
     char tmp3[15];
@@ -2126,7 +2146,7 @@ yyreduce:
     break;
 
   case 67:
-#line 533 "syntaxique.y"
+#line 553 "syntaxique.y"
     {
 
     char tmp3[15];
@@ -2139,14 +2159,14 @@ yyreduce:
     break;
 
   case 68:
-#line 542 "syntaxique.y"
+#line 562 "syntaxique.y"
     {
     (yyval.strVal) = strdup((yyvsp[(2) - (3)].strVal));
   ;}
     break;
 
   case 69:
-#line 545 "syntaxique.y"
+#line 565 "syntaxique.y"
     {
     // sprintf($$, "%d", $1);
     char temp[15];
@@ -2158,7 +2178,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2162 "syntaxique.tab.c"
+#line 2182 "syntaxique.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2372,7 +2392,7 @@ yyreturn:
 }
 
 
-#line 554 "syntaxique.y"
+#line 574 "syntaxique.y"
 
 
 void yysuccess(char *s){
@@ -2381,6 +2401,7 @@ void yysuccess(char *s){
 
 void yyerror(const char *s) {
     fprintf(stdout, "File output, line %d, character %d :  %s \n", yylineno, currentColumn, s);
+    exit(1);
 }
 
 int main(void) {
@@ -2393,8 +2414,8 @@ int main(void) {
         return 1;
     }
 
-    // printSymbolTable(&symbolTable);
-    // freeSymbolTable(&symbolTable);
+    printSymbolTable(&symbolTable);
+    freeSymbolTable(&symbolTable);
     return 0;
 }
 

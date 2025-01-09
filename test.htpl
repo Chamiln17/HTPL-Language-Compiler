@@ -1,6 +1,6 @@
 <program>
 <variables>
-        <int name="counter">(2+5-5)*(5*3 + 1)</int>
+        <int name="counter">(3.4)</int>
         <string name="message">"Test"</string>
     </variables>
     
@@ -8,7 +8,7 @@
         <print value="Counter initialized to 10"/>
         
         <while condition=(counter >> 0)>
-            <assign counter=(counter + 9999)/>
+            <assign counter=(counter)/>
             <print value="Counter: + counter"/>
         </while>
         
