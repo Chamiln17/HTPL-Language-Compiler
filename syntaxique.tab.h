@@ -98,10 +98,12 @@ extern int yydebug;
     TOKEN_CLOSE_PARENTHESIS = 299, /* TOKEN_CLOSE_PARENTHESIS  */
     TOKEN_ASSIGN = 300,            /* TOKEN_ASSIGN  */
     TOKEN_QUOTE = 301,             /* TOKEN_QUOTE  */
-    IDENTIFICATEUR = 302,          /* IDENTIFICATEUR  */
-    TOKEN_INT = 303,               /* TOKEN_INT  */
-    TOKEN_FLOAT = 304,             /* TOKEN_FLOAT  */
-    TOKEN_BOOLEAN = 305            /* TOKEN_BOOLEAN  */
+    TOKEN_OPEN_BRACKET = 302,      /* TOKEN_OPEN_BRACKET  */
+    TOKEN_CLOSE_BRACKET = 303,     /* TOKEN_CLOSE_BRACKET  */
+    IDENTIFICATEUR = 304,          /* IDENTIFICATEUR  */
+    TOKEN_INT = 305,               /* TOKEN_INT  */
+    TOKEN_FLOAT = 306,             /* TOKEN_FLOAT  */
+    TOKEN_BOOLEAN = 307            /* TOKEN_BOOLEAN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -110,15 +112,16 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 30 "syntaxique.y"
+#line 146 "syntaxique.y"
 
     int intVal;
     float floatVal;
     char* strVal;
     bool boolVal;
     AttributeValue attr;
+    elementsArray elementsValues;
 
-#line 122 "syntaxique.tab.h"
+#line 125 "syntaxique.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
