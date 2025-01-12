@@ -173,6 +173,9 @@ void printSymbolTable(SymbolTable *table)
             case TYPE_BOOLEAN:
                 printf("booleen");
                 break;
+            case TYPE_ARRAY:
+                printf("tableau");
+                break;
             default:
                 printf("non defini");
             }
@@ -315,7 +318,7 @@ bool isBoolean(const char *str)
 
 bool isVariable(const char *str)
 {
-    if (!str || !isalpha(*str) || *str != '_')
+    if (!str || (!isalpha(*str) && *str != '_'))
         return false; // Must start with letter
 
     str++;

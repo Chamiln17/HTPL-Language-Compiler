@@ -24,11 +24,69 @@ char* trimQuotes(char* str) {
     return str;
 }
 
+#define MAX_ATTRIBUTES 10
+
 typedef struct {
     char* name;
     char* value;
     DataType type;
+} SingleAttribute;
+
+typedef struct {
+    SingleAttribute attrs[MAX_ATTRIBUTES];
+    int count;
 } AttributeValue;
+
+
+void initAttributeValue(AttributeValue* av) {
+    av->count = 0;
+}
+
+void addAttribute(AttributeValue* av, const char* name, const char* value, DataType type) {
+    if (av->count < MAX_ATTRIBUTES) {
+        av->attrs[av->count].name = strdup(name);
+        av->attrs[av->count].value = strdup(value);
+        av->attrs[av->count].type = type;
+        av->count++;
+    }
+}
+
+typedef struct {
+    char* values[10];
+    int count;
+} elementsArray;
+
+void addElement(elementsArray* ea, const char* value) {
+    if (ea->count < 10) {
+        ea->values[ea->count++] = strdup(value);
+    }
+}
+
+// Function to check if a string is an array reference
+bool isArrayReference(const char* str) {
+    char* bracket = strchr(str, '[');
+    return bracket != NULL && strchr(bracket, ']') != NULL;
+}
+
+// Function to extract array name from reference
+char* getArrayName(const char* arrayRef) {
+    char* bracket = strchr(arrayRef, '[');
+    if (!bracket) return NULL;
+    
+    int nameLen = bracket - arrayRef;
+    char* name = malloc(nameLen + 1);
+    strncpy(name, arrayRef, nameLen);
+    name[nameLen] = '\0';
+    return name;
+}
+
+// Function to extract array index from reference
+int getArrayIndex(const char* arrayRef) {
+    char* bracket = strchr(arrayRef, '[');
+    if (!bracket) return -1;
+    return atoi(bracket + 1);
+}
+
 
 int QC=0;
 int ti=0;
@@ -82,6 +140,8 @@ int pop(int stack[], int *top) {
     return stack[(*top)--];
 }
 
+
+
 %}
 %union {
     int intVal;
@@ -89,6 +149,7 @@ int pop(int stack[], int *top) {
     char* strVal;
     bool boolVal;
     AttributeValue attr;
+    elementsArray elementsValues;
 }
 
 
@@ -118,6 +179,7 @@ int pop(int stack[], int *top) {
 %token TOKEN_GREATER_OR_EQUAL TOKEN_LOWER_OR_EQUAL TOKEN_EQUAL
 %token TOKEN_OPEN_PARENTHESIS TOKEN_CLOSE_PARENTHESIS
 %token TOKEN_ASSIGN TOKEN_QUOTE
+%token TOKEN_OPEN_BRACKET TOKEN_CLOSE_BRACKET
 %token <strVal> IDENTIFICATEUR
 %token <intVal> TOKEN_INT
 %token <floatVal> TOKEN_FLOAT
@@ -127,6 +189,10 @@ int pop(int stack[], int *top) {
 %type <attr> attributes
 %type <strVal> expr_arithmetique terme facteur
 %type <strVal> expr_logique
+%type <strVal> array_reference
+%type <strVal> element
+%type <elementsValues> elements
+
 
 
 %%
@@ -146,45 +212,101 @@ variables_list:
 declaration_list:
    TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
         
-        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        addSymbol(&symbolTable, $2.attrs[0].name , TYPE_INTEGER);
         char temp[15];
         sprintf(temp, "%s", $4);
 
         if (!isInteger(temp) && !isVariable(temp)) {
-            yyerror("Invalid value for integer variable");
+            yyerror("Invalid value for integer variable ");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     } declaration_list
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_FLOAT);
         char temp[15];
         sprintf(temp, "%s", $4);
         if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
             yyerror("Invalid value for float variable");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     } declaration_list
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_STRING);
         char temp[15];
         sprintf(temp, "%s", $4);
         if (!isString(temp)) {
             yyerror("Invalid value for string variable");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     } declaration_list
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_BOOLEAN);
         char temp[15];
         sprintf(temp, "%s", $4);
         if (!isBoolean(temp) && !isVariable(temp)) {
             yyerror("Invalid value for boolean variable");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     } declaration_list
-   | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE declaration_list
+   | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE declaration_list {// Get array attributes (name, type, size)
+        char* arrayName = NULL;
+        char* arrayType = NULL;
+        int arraySize = 0;
+        DataType type = TYPE_UNDEFINED;
+
+
+        // Parse through attributes to find name, type, and size
+        if ($2.attrs[0].name) {
+                arrayName = $2.attrs[0].name;
+            }
+        for(int i = 1; i < $2.count; i++) {
+            printf("Attribute name: %s\n", $2.attrs[i].name);
+            
+            if (strcmp($2.attrs[i].name, "type") == 0) {
+                arrayType = $2.attrs[i].value;
+                // Convert string type to DataType enum
+                if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
+                else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
+                else if (strcmp(arrayType, "string") == 0) type = TYPE_STRING;
+                else if (strcmp(arrayType, "boolean") == 0) type = TYPE_BOOLEAN;
+            }
+            else if (strcmp($2.attrs[i].name, "size") == 0) {
+                arraySize = atoi($2.attrs[i].value);
+            }
+        }
+
+        // Validate array attributes
+        if (!arrayName || !arrayType || arraySize <= 0) {
+            yyerror("Invalid array declaration: missing name, type, or size");
+        }
+
+        // Add to symbol table with array type
+        bool added = addSymbol(&symbolTable, arrayName, TYPE_ARRAY);
+        if (!added) {
+            yyerror("Failed to add array to symbol table");
+        }
+
+        // Generate quadruplets for array declaration
+        char sizeStr[15];
+        sprintf(sizeStr, "%d", arraySize);
+        
+        // Generate bounds quadruplet (Bounds, lower_bound, upper_bound, )
+        createQuad("Bounds", "1", sizeStr, "");
+        
+        // Generate array declaration quadruplet (ADEC, array_name, , )
+        createQuad("ADEC", arrayName, "", "");
+
+        //add quadruplet for each element
+        for(int i = 0; i < $4.count; i++) {
+            char temp[15];
+            sprintf(temp, "%s", $4.values[i]);
+            char indexedName[30];
+            sprintf(indexedName, "%s[%d]", arrayName, i + 1);
+            createQuad(":=", temp, "", indexedName);
+        }
+   }
    | TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_INTEGER);
         printf("Declaration:" );
         printf("Name: %s\n", $4);
         char temp[15];
@@ -192,124 +314,311 @@ declaration_list:
         if (!isInteger(temp) && !isVariable(temp)) {
             yyerror("Invalid value for integer variable");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_FLOAT_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_FLOAT);
         char temp[15];
         sprintf(temp, "%s", $4);
         if (!isFloat(temp) && !isInteger(temp) && !isVariable(temp)) {
             yyerror("Invalid value for float variable");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_END_TAG TOKEN_STRING TOKEN_VAR_STRING_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_STRING);
         char temp[15];
         sprintf(temp, "%s", $4);
         if (!isString(temp)) {
             yyerror("Invalid value for string variable");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_END_TAG expr_logique TOKEN_VAR_BOOLEAN_CLOSE {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_BOOLEAN);
         char temp[15];
         sprintf(temp, "%s", $4);
         if (!isBoolean(temp) && !isVariable(temp)) {
             yyerror("Invalid value for boolean variable");
         }
-        createQuad(":=", temp, "", $2.name);
+        createQuad(":=", temp, "", $2.attrs[0].name);
     }
-   | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE
+   | TOKEN_ARRAY_OPEN attributes TOKEN_END_TAG elements TOKEN_ARRAY_CLOSE{// Get array attributes (name, type, size)
+        char* arrayName = NULL;
+        char* arrayType = NULL;
+        int arraySize = 0;
+        DataType type = TYPE_UNDEFINED;
+
+
+        // Parse through attributes to find name, type, and size
+        if ($2.attrs[0].name) {
+                arrayName = $2.attrs[0].name;
+            }
+        for(int i = 1; i < $2.count; i++) {
+            printf("Attribute name: %s\n", $2.attrs[i].name);
+            
+            if (strcmp($2.attrs[i].name, "type") == 0) {
+                arrayType = $2.attrs[i].value;
+                // Convert string type to DataType enum
+                if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
+                else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
+                else if (strcmp(arrayType, "string") == 0) type = TYPE_STRING;
+                else if (strcmp(arrayType, "boolean") == 0) type = TYPE_BOOLEAN;
+            }
+            else if (strcmp($2.attrs[i].name, "size") == 0) {
+                arraySize = atoi($2.attrs[i].value);
+            }
+        }
+
+        // Validate array attributes
+        if (!arrayName || !arrayType || arraySize <= 0) {
+            yyerror("Invalid array declaration: missing name, type, or size");
+        }
+
+        // Add to symbol table with array type
+        bool added = addSymbol(&symbolTable, arrayName, TYPE_ARRAY);
+        if (!added) {
+            yyerror("Failed to add array to symbol table");
+        }
+
+        // Generate quadruplets for array declaration
+        char sizeStr[15];
+        sprintf(sizeStr, "%d", arraySize);
+        
+        // Generate bounds quadruplet (Bounds, lower_bound, upper_bound, )
+        createQuad("Bounds", "1", sizeStr, "");
+        
+        // Generate array declaration quadruplet (ADEC, array_name, , )
+        createQuad("ADEC", arrayName, "", "");
+        //add quadruplet for each element
+        for(int i = 0; i < $4.count; i++) {
+            char temp[15];
+            sprintf(temp, "%s", $4.values[i]);
+            char indexedName[30];
+            sprintf(indexedName, "%s[%d]", arrayName, i + 1);
+            createQuad(":=", temp, "", indexedName);
+        }
+   }
    | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        createQuad(":=", "0", "", $2.name);
+        createQuad(":=", "0", "", $2.attrs[0].name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
-        createQuad(":=", "0.0", "", $2.name);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_FLOAT);
+        createQuad(":=", "0.0", "", $2.attrs[0].name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        createQuad(":=", "", "", $2.name);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_STRING);
+        createQuad(":=", "", "", $2.attrs[0].name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_BOOLEAN);
         
-        createQuad(":=", "0", "", $2.name);
+        createQuad(":=", "0", "", $2.attrs[0].name);
     }
-   | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list
+   | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG declaration_list{
+        char* arrayName = NULL;
+        char* arrayType = NULL;
+        int arraySize = 0;
+        DataType type = TYPE_UNDEFINED;
+
+
+        // Parse through attributes to find name, type, and size
+        if ($2.attrs[0].name) {
+                arrayName = $2.attrs[0].name;
+            }
+        for(int i = 1; i < $2.count; i++) {
+            printf("Attribute name: %s\n", $2.attrs[i].name);
+            
+            if (strcmp($2.attrs[i].name, "type") == 0) {
+                arrayType = $2.attrs[i].value;
+                // Convert string type to DataType enum
+                if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
+                else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
+                else if (strcmp(arrayType, "string") == 0) type = TYPE_STRING;
+                else if (strcmp(arrayType, "boolean") == 0) type = TYPE_BOOLEAN;
+            }
+            else if (strcmp($2.attrs[i].name, "size") == 0) {
+                arraySize = atoi($2.attrs[i].value);
+            }
+        }
+
+        // Validate array attributes
+        if (!arrayName || !arrayType || arraySize <= 0) {
+            yyerror("Invalid array declaration: missing name, type, or size");
+        }
+
+        // Add to symbol table with array type
+        bool added = addSymbol(&symbolTable, arrayName, TYPE_ARRAY);
+        if (!added) {
+            yyerror("Failed to add array to symbol table");
+        }
+
+        // Generate quadruplets for array declaration
+        char sizeStr[15];
+        sprintf(sizeStr, "%d", arraySize);
+        
+        // Generate bounds quadruplet (Bounds, lower_bound, upper_bound, )
+        createQuad("Bounds", "1", sizeStr, "");
+        
+        // Generate array declaration quadruplet (ADEC, array_name, , )
+        createQuad("ADEC", arrayName, "", "");
+   }
    | TOKEN_VAR_INT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_INTEGER);
-        createQuad(":=", "0", "", $2.name);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_INTEGER);
+        createQuad(":=", "0", "", $2.attrs[0].name);
     }
    | TOKEN_VAR_FLOAT_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_FLOAT);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_FLOAT);
         
-        createQuad(":=", "0.0", "", $2.name);
+        createQuad(":=", "0.0", "", $2.attrs[0].name);
     }
    | TOKEN_VAR_STRING_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_STRING);
-        createQuad(":=", "", "", $2.name);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_STRING);
+        createQuad(":=", "", "", $2.attrs[0].name);
     }
    | TOKEN_VAR_BOOLEAN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
-        addSymbol(&symbolTable, $2.name, TYPE_BOOLEAN);
-        createQuad(":=", "0", "", $2.name);
+        addSymbol(&symbolTable, $2.attrs[0].name, TYPE_BOOLEAN);
+        createQuad(":=", "0", "", $2.attrs[0].name);
     }
-    | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG
+    | TOKEN_ARRAY_OPEN attributes TOKEN_SELF_CLOSING_TAG {
+        char* arrayName = NULL;
+        char* arrayType = NULL;
+        int arraySize = 0;
+        DataType type = TYPE_UNDEFINED;
+
+
+        // Parse through attributes to find name, type, and size
+        if ($2.attrs[0].name) {
+                arrayName = $2.attrs[0].name;
+            }
+        for(int i = 1; i < $2.count; i++) {
+            printf("Attribute name: %s\n", $2.attrs[i].name);
+            
+            if (strcmp($2.attrs[i].name, "type") == 0) {
+                arrayType = $2.attrs[i].value;
+                // Convert string type to DataType enum
+                if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
+                else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
+                else if (strcmp(arrayType, "string") == 0) type = TYPE_STRING;
+                else if (strcmp(arrayType, "boolean") == 0) type = TYPE_BOOLEAN;
+            }
+            else if (strcmp($2.attrs[i].name, "size") == 0) {
+                arraySize = atoi($2.attrs[i].value);
+            }
+        }
+
+        // Validate array attributes
+        if (!arrayName || !arrayType || arraySize <= 0) {
+            yyerror("Invalid array declaration: missing name, type, or size");
+        }
+
+        // Add to symbol table with array type
+        bool added = addSymbol(&symbolTable, arrayName, TYPE_ARRAY);
+        if (!added) {
+            yyerror("Failed to add array to symbol table");
+        }
+
+        // Generate quadruplets for array declaration
+        char sizeStr[15];
+        sprintf(sizeStr, "%d", arraySize);
+        
+        // Generate bounds quadruplet (Bounds, lower_bound, upper_bound, )
+        createQuad("Bounds", "1", sizeStr, "");
+        
+        // Generate array declaration quadruplet (ADEC, array_name, , )
+        createQuad("ADEC", arrayName, "", "");
+    }
     ;
 
 
+array_reference:
+    IDENTIFICATEUR TOKEN_OPEN_BRACKET expr_arithmetique TOKEN_CLOSE_BRACKET {
+        char temp[15];
+        snprintf(temp, sizeof(temp), "%s[%s]", $1, $3);
+        $$ = strdup(temp);
+    }
+    ;
+
 attributes:
    IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING attributes {
-        if (strcmp($1,"name")==0){
-        $$.name = strdup(trimQuotes($3));  // this is the variable name
-        $$.type = TYPE_STRING;
-        }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
-        $$.name = strdup($1);
-        $$.value = strdup($3);  
-        $$.type = TYPE_STRING;
+        initAttributeValue(&$$);
+        if (strcmp($1,"name") == 0) {
+            addAttribute(&$$, trimQuotes($3),"value" , TYPE_STRING);
+        } else {
+            addAttribute(&$$, $1, $3, TYPE_STRING);
+        }
+        // Merge attributes from $4
+        for(int i = 0; i < $4.count; i++) {
+            addAttribute(&$$, $4.attrs[i].name, $4.attrs[i].value, $4.attrs[i].type);
         }
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes {
-        //this is to get just the value of the attribute and its name
-        $$.name = strdup($1);
-        $$.value = $4;  
-        $$.type = TYPE_INTEGER;
+        initAttributeValue(&$$);
+        addAttribute(&$$, $1, $4, TYPE_INTEGER);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes {
-        $$.name = strdup($1);
-        $$.value = $4;  
-        $$.type = TYPE_BOOLEAN;
+        initAttributeValue(&$$);
+        addAttribute(&$$, $1, $4, TYPE_BOOLEAN);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING {
-        if (strcmp($1,"name")==0){
-        $$.name = strdup(trimQuotes($3));  // this is the variable name
-        $$.type = TYPE_STRING;
-        }else{// else so the attribute isn't for naming a var , we just return the name of attribute and its value (will be used in case of assign)
-        $$.name = strdup($1);
-        $$.value = strdup($3);  
-        $$.type = TYPE_STRING;
+        initAttributeValue(&$$);
+        if (strcmp($1,"name") == 0) {
+            addAttribute(&$$, trimQuotes($3), "value" , TYPE_STRING);
+        } else {
+            addAttribute(&$$, $1, $3, TYPE_STRING);
         }
+
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
-        $$.name = strdup($1);
-        $$.value = $4;  
-        $$.type = TYPE_INTEGER;
+        initAttributeValue(&$$);
+        addAttribute(&$$, $1, $4, TYPE_INTEGER);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
-        $$.name = strdup($1);
-        $$.value = $4;  
-        $$.type = TYPE_BOOLEAN;
+        initAttributeValue(&$$);
+        addAttribute(&$$, $1, $4, TYPE_BOOLEAN);
+    }
+    | array_reference TOKEN_ASSIGN TOKEN_STRING {
+        initAttributeValue(&$$);
+        if (strcmp($1,"name") == 0) {
+            addAttribute(&$$, trimQuotes($3), "value" , TYPE_STRING);
+        } else {
+            addAttribute(&$$, $1, $3, TYPE_STRING);
+        }
+
+    }
+   | array_reference TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
+        initAttributeValue(&$$);
+        addAttribute(&$$, $1, $4, TYPE_INTEGER);
+    }
+   | array_reference TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
+        initAttributeValue(&$$);
+        addAttribute(&$$, $1, $4, TYPE_BOOLEAN);
     }
    ;
 
 elements:
-   element elements  | /* void */
+   element elements {
+    addElement(&$2, $1);
+    //print elements
+    for(int i = 0; i < $2.count; i++) {
+        printf("Element %d: %s\n", i, $2.values[i]);
+    }
+    $$ = $2;
+   } | /* void */ {
+        elementsArray ea;
+        ea.count = 0;
+        $$ = ea;
+   }
    ;
 
 element:
-   TOKEN_ELEMENT_OPEN attributes TOKEN_SELF_CLOSING_TAG
+   TOKEN_ELEMENT_OPEN attributes TOKEN_SELF_CLOSING_TAG{
+    if(strcmp($2.attrs[0].name, "value") == 0){
+        char temp[15];
+        sprintf(temp, "%s", $2.attrs[0].value);
+        $$ = strdup(temp);
+    }
+   }
    ;
 
 instruction_list:
@@ -327,12 +636,27 @@ instruction:
 assignment:
     TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG {
         //update the value of a variable
-        SymbolEntry* entry = findSymbol(&symbolTable, $2.name);
-        if (!entry) {
-            yyerror("Variable undefined");
+        SymbolEntry* entry;
+        if(isArrayReference($2.attrs[0].name)){
+            char* arrayName = getArrayName($2.attrs[0].name);
+            int index = getArrayIndex($2.attrs[0].name);
+            entry = findSymbol(&symbolTable, arrayName);
+            if (!entry) {
+                yyerror("Array undefined");
+            }
+            if (entry->type != TYPE_ARRAY) {
+                yyerror("Variable is not an array");
+            }
+            free(arrayName);
+        }else{//normal variable
+            entry = findSymbol(&symbolTable, $2.attrs[0].name);
+            if (!entry) {
+                yyerror("Variable undefined");
+            }
         }
+        
         char temp[15];
-        sprintf(temp, "%s", $2.value);
+        sprintf(temp, "%s", $2.attrs[0].value);
         if (entry->type == TYPE_INTEGER) {
             if (!isInteger(temp) && !isVariable(temp)) {
                 yyerror("Invalid value for integer variable");
@@ -349,8 +673,8 @@ assignment:
             if (!isBoolean(temp) && !isVariable(temp)) {
                 yyerror("Invalid value for boolean variable");
             }
-        } 
-        createQuad(":=", temp, "", $2.name);
+        } //TODO: handle array type and array refernec type
+        createQuad(":=", temp, "", $2.attrs[0].name);
 }
 ;
 
@@ -383,10 +707,10 @@ if_statement:
 if_condition:
 TOKEN_IF_OPEN attributes {
 
-    if (strcmp($2.name, "condition") == 0) {
+    if (strcmp($2.attrs[0].name, "condition") == 0) {
         sauv_begin_if[++top_begin_if] = QC;
         char temp[15];
-        sprintf(temp, "%s", $2.value);
+        sprintf(temp, "%s", $2.attrs[0].value);
         createQuad("BZ", "", "", temp);
     } else {
         yyerror("Invalid attribute for if statement");
@@ -412,10 +736,10 @@ while_statement:
 while_condition:
     TOKEN_WHILE_OPEN attributes {
 
-    if (strcmp($2.name, "condition") == 0) {
+    if (strcmp($2.attrs[0].name, "condition") == 0) {
         sauv_begin_While[++top_begin_While] = QC;
         char temp[15];
-        sprintf(temp, "%s", $2.value);
+        sprintf(temp, "%s", $2.attrs[0].value);
         createQuad("BZ", "", "", temp);
 
     } else {
@@ -481,7 +805,7 @@ terme:
    ;
 
 facteur:
-   TOKEN_INT { 
+    TOKEN_INT { 
 
     // printf("heloo");
     char temp[15];
@@ -490,32 +814,33 @@ facteur:
     $$ = strdup(temp);
 
     }
-   | TOKEN_FLOAT { 
+    | TOKEN_FLOAT { 
 
     char temp[15];
     sprintf(temp, "%f", $1);
 
     $$ = strdup(temp);
     }
-   | IDENTIFICATEUR {
+    | IDENTIFICATEUR {
     char temp[15];
     sprintf(temp, "%s", $1);
     printf("Debug - Facteur IDENTIFICATEUR: %s\n", $1);
     $$ = strdup(temp);
     }
-   | TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
+    | array_reference {
+        $$ = $1;
+    }
+    | TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
     // $$ = $2
         char temp[15];
         sprintf(temp, "%s", $2);
 
         $$ = strdup(temp);
-     }
-   ; 
+    }
+; 
 
 expr_logique:
    expr_arithmetique TOKEN_EQUAL expr_arithmetique {
-
-    
 
     char tmp3[15];
     sprintf(tmp3, "T%d", ti++);

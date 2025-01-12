@@ -16,6 +16,12 @@ typedef struct {
     DataType type;
 } AttributeValue;
 
+
+typedef struct {
+    char* values[10];
+    int count;
+} elementsArray;
+
 #include "syntaxique.tab.h"
 
 
@@ -83,6 +89,8 @@ void token_action(int token, char* text, FILE* output_file) {
         case TOKEN_INT: token_name = "TOKEN_INT"; break;
         case TOKEN_FLOAT: token_name = "TOKEN_FLOAT"; break;
         case TOKEN_BOOLEAN: token_name = "TOKEN_BOOLEAN"; break;
+        case TOKEN_OPEN_BRACKET : token_name = "TOKEN_OPEN_BRACKET"; break;
+        case TOKEN_CLOSE_BRACKET : token_name = "TOKEN_CLOSE_BRACKET"; break;
 
         default: token_name = "UNRECOGNIZED"; break;
     }
@@ -126,6 +134,9 @@ comment     \#[^\n]*
 }
 
 {comment}             { /* Ignore comments */ }
+
+"["                   { current_token = TOKEN_OPEN_BRACKET; token_action(current_token, yytext, output_file); yysuccess(yytext); return current_token; }
+"]"                   { current_token = TOKEN_CLOSE_BRACKET; token_action(current_token, yytext, output_file); yysuccess(yytext); return current_token; }
 
 "<program>"            { current_token = TOKEN_PROGRAM_OPEN; token_action(current_token, yytext, output_file);yysuccess(yytext);return current_token; }
 "</program>"          { current_token = TOKEN_PROGRAM_CLOSE; token_action(current_token, yytext, output_file);yysuccess(yytext); return current_token; }

@@ -1,20 +1,24 @@
 <program>
 <variables>
-        <int name="counter">(3.4)</int>
+        <int name="counter">(3)</int>
         <string name="message">"Test"</string>
+        <array name="numbers" type="int" size=(5)>
+            <element value=(1)/>
+            <element value=(2)/>
+        </array>
     </variables>
     
     <instructions>
         <print value="Counter initialized to 10"/>
         
         <while condition=(counter >> 0)>
-            <assign counter=(counter)/>
+            <assign numbers[2]=(numbers[1] + 1)/>
             <print value="Counter: + counter"/>
         </while>
         
         <if condition=(counter == 0)>
-            <assign counter=(counter - 1)/>
-            <assign counter=(counter - 1)/>
+            <assign counter=(3 - 1)/>
+            <assign counter=(4 - 1)/>
         <else>
             <assign counter=(counter + 1)/>
             <assign counter=(counter + 1)/>
