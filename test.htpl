@@ -3,8 +3,8 @@
         <int name="counter">(3)</int>
         <string name="message">"Test"</string>
         <array name="numbers" type="int" size=(5)>
-            <element value=(1)/>
-            <element value=(2)/>
+            <element value=(5)/>
+            <element value=(6)/>
         </array>
     </variables>
     
@@ -12,7 +12,7 @@
         <print value="Counter initialized to 10"/>
         
         <while condition=(counter >> 0)>
-            <assign numbers[2]=(numbers[1] + 1)/>
+            <assign numbers[3]=(3+numbers[3])/>
             <print value="Counter: + counter"/>
         </while>
         

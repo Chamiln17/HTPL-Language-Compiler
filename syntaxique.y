@@ -15,13 +15,18 @@ int currentColumn = 1;
 
 SymbolTable symbolTable;
 
-char* trimQuotes(char* str) {
+char* trimQuotes(const char* str) {
     size_t len = strlen(str);
-    if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
-        str[len - 1] = '\0';
-        return str + 1;
+    char* result = strdup(str);  // Make a copy of the original string
+    
+    if (len >= 2 && result[0] == '"' && result[len - 1] == '"') {
+        result[len - 1] = '\0';  // Remove ending quote
+        char* trimmed = strdup(result + 1);  // Make a copy without starting quote
+        free(result);  // Free the intermediate copy
+        return trimmed;
     }
-    return str;
+    
+    return result;  // Return the copy as-is if no quotes found
 }
 
 #define MAX_ATTRIBUTES 10
@@ -291,6 +296,31 @@ declaration_list:
         arrayDetails.size = arraySize;    
         updateSymbolValue(&symbolTable, arrayName, arrayDetails);
 
+        //check if the elements are of the same type as the array
+        for(int i = 0; i < $4.count; i++) {
+            char temp[15];
+            sprintf(temp, "%s", $4.values[i]);
+            
+            printf("temp: %s\n", temp);
+            printf("arrayType: %s\n", arrayType);
+            if (type == TYPE_INTEGER) {
+                if (!isInteger(trimQuotes(temp))) {
+                    yyerror("Invalid value for integer array element");
+                }
+            } else if (type == TYPE_FLOAT) {
+                if (!isInteger(trimQuotes(temp)) && !isFloat(trimQuotes(temp))) {
+                    yyerror("Invalid value for float array element");
+                }
+            } else if (type == TYPE_STRING) {
+                if (!isString(temp)) {
+                    yyerror("Invalid value for string array element");
+                }
+            } else if (type == TYPE_BOOLEAN) {
+                if (!isBoolean(trimQuotes(temp))) {
+                    yyerror("Invalid value for boolean array element");
+                }
+            }
+        }
 
         // Generate quadruplets for array declaration
         char sizeStr[15];
@@ -389,6 +419,32 @@ declaration_list:
         arrayDetails.elementType = type;
         arrayDetails.size = arraySize;
         updateSymbolValue(&symbolTable, arrayName, arrayDetails);
+
+        //check if the elements are of the same type as the array
+        for(int i = 0; i < $4.count; i++) {
+            char temp[15];
+            sprintf(temp, "%s", $4.values[i]);
+            
+            printf("temp: %s\n", temp);
+            printf("arrayType: %s\n", arrayType);
+            if (type == TYPE_INTEGER) {
+                if (!isInteger(trimQuotes(temp))) {
+                    yyerror("Invalid value for integer array element");
+                }
+            } else if (type == TYPE_FLOAT) {
+                if (!isInteger(trimQuotes(temp)) && !isFloat(trimQuotes(temp))) {
+                    yyerror("Invalid value for float array element");
+                }
+            } else if (type == TYPE_STRING) {
+                if (!isString(temp)) {
+                    yyerror("Invalid value for string array element");
+                }
+            } else if (type == TYPE_BOOLEAN) {
+                if (!isBoolean(trimQuotes(temp))) {
+                    yyerror("Invalid value for boolean array element");
+                }
+            }
+        }
 
         // Generate quadruplets for array declaration
         char sizeStr[15];
@@ -548,9 +604,26 @@ declaration_list:
 
 array_reference:
     IDENTIFICATEUR TOKEN_OPEN_BRACKET expr_arithmetique TOKEN_CLOSE_BRACKET {
+        SymbolEntry* entry;
         char temp[15];
         snprintf(temp, sizeof(temp), "%s[%s]", $1, $3);
         $$ = strdup(temp);
+
+        char arrayName[15];
+        sprintf(arrayName, "%s", $1);
+        int index = atoi($3); 
+        entry = findSymbol(&symbolTable, arrayName);
+        if (!entry) {
+            yyerror("Array undefined");
+        }
+        if (entry->type != TYPE_ARRAY) {
+            yyerror("Variable is not an array");
+        }
+        //check for index out of bound
+        if(index > entry->Details.arrayInfo.size || index < 1){
+            yyerror("Index out of bound");
+        }
+        
     }
     ;
 
@@ -562,11 +635,15 @@ attributes:
             yyerror("Size attribute is not supposed to have string value");
         }
 
+        if(strcmp($1,"condition")==0){
+            yyerror("condition attribute is not supposed to have string value");
+        }
+
         //if the name is type , value needs to be one of the following strings : int, float, string, boolean
         char tmp[15] ;
         sprintf(tmp, "%s", $3);
         if(strcmp($1,"type")==0){
-            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes($3),"float")!=0 && strcmp(trimQuotes($3),"string")!=0 && strcmp(trimQuotes($3),"boolean")!=0){
+            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes(tmp),"float")!=0 && strcmp(trimQuotes(tmp),"string")!=0 && strcmp(trimQuotes(tmp),"boolean")!=0){
                 yyerror("Invalid value for type attribute");
             }
         }
@@ -594,6 +671,10 @@ attributes:
         if(strcmp($1,"type")==0){
             yyerror("type attribute is not supposed to have non string value");
         }
+
+        if(strcmp($1,"condition")==0){
+            yyerror("condition attribute is not supposed to have arithmetique value");
+        }
         addAttribute(&$$, $1, $4, TYPE_INTEGER);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes {
@@ -616,11 +697,15 @@ attributes:
             yyerror("Size attribute is not supposed to have string value");
         }
 
+        if(strcmp($1,"condition")==0){
+            yyerror("condition attribute is not supposed to have string value");
+        }
+
         //if the name is type , value needs to be one of the following strings : int, float, string, boolean
         char tmp[15] ;
         sprintf(tmp, "%s", $3);
         if(strcmp($1,"type")==0){
-            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes($3),"float")!=0 && strcmp(trimQuotes($3),"string")!=0 && strcmp(trimQuotes($3),"boolean")!=0){
+            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes(tmp),"float")!=0 && strcmp(trimQuotes(tmp),"string")!=0 && strcmp(trimQuotes(tmp),"boolean")!=0){
                 yyerror("Invalid value for type attribute");
             }
         }
@@ -642,6 +727,9 @@ attributes:
         if(strcmp($1,"type")==0){
             yyerror("type attribute is not supposed to have non string value");
         }
+        if(strcmp($1,"condition")==0){
+            yyerror("condition attribute is not supposed to have arithmetic value");
+        }
         addAttribute(&$$, $1, $4, TYPE_INTEGER);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
@@ -659,11 +747,7 @@ attributes:
     }
     | array_reference TOKEN_ASSIGN TOKEN_STRING {
         initAttributeValue(&$$);
-        if (strcmp($1,"name") == 0) {
-            addAttribute(&$$, trimQuotes($3), "value" , TYPE_STRING);
-        } else {
-            addAttribute(&$$, $1, $3, TYPE_STRING);
-        }
+        addAttribute(&$$, $1, $3, TYPE_STRING);
 
     }
    | array_reference TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
@@ -726,6 +810,10 @@ assignment:
             if (entry->type != TYPE_ARRAY) {
                 yyerror("Variable is not an array");
             }
+            //check for index out of bound
+            if(index > entry->Details.arrayInfo.size || index < 1){
+                yyerror("Index out of bound");
+            }
             free(arrayName);
         }else{//normal variable
             entry = findSymbol(&symbolTable, $2.attrs[0].name);
@@ -752,7 +840,31 @@ assignment:
             if (!isBoolean(temp) && !isVariable(temp)) {
                 yyerror("Invalid value for boolean variable");
             }
-        } //TODO: handle array type and array refernec type
+        } else if (entry->type == TYPE_ARRAY) {
+            if(isArrayReference($2.attrs[0].name)){
+                if(entry->Details.arrayInfo.elementType == TYPE_INTEGER){
+                    if (!isInteger(temp) && !isVariable(temp)) {
+                        yyerror("Invalid value for integer array element");
+                    }
+                }else if(entry->Details.arrayInfo.elementType == TYPE_FLOAT){
+                    if (!isInteger(temp) && !isFloat(temp) && !isVariable(temp)) {
+                        yyerror("Invalid value for float array element");
+                    }
+                }else if(entry->Details.arrayInfo.elementType == TYPE_STRING){
+                    if (!isString(temp)) {
+                        yyerror("Invalid value for string array element");
+                    }
+                }else if(entry->Details.arrayInfo.elementType == TYPE_BOOLEAN){
+                    if (!isBoolean(temp) && !isVariable(temp)) {
+                        yyerror("Invalid value for boolean array element");
+                    }
+                }
+            }else{
+                if (!isVariable(temp)) {
+                        yyerror("Invalid value for array variable");
+                }
+            }
+        }
         createQuad(":=", temp, "", $2.attrs[0].name);
 }
 ;
