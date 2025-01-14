@@ -351,6 +351,21 @@ bool isString(const char *str)
     return true;
 }
 
+bool isIdentifier(const char *str)
+{
+    if (!str || (!isalpha(*str) && *str != '_'))
+        return false; // Must start with letter
+
+    str++;
+    while (*str)
+    {
+        if (!isalnum(*str) && *str != '_')
+            return false;
+        str++;
+    }
+    return true;
+}
+
 int isalpha(int c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');

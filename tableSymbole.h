@@ -47,6 +47,7 @@ bool isFloat(const char *str);
 bool isBoolean(const char *str);
 bool isVariable(const char *str);
 bool isString(const char *str);
+bool isIdentifier(const char *str);
 int isalpha(int c);
 int isdigit(int c);
 int isalnum(int c);

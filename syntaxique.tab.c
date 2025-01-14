@@ -712,11 +712,11 @@ static const yytype_int16 yyrline[] =
        0,   201,   201,   208,   209,   213,   213,   224,   224,   233,
      233,   242,   242,   251,   314,   324,   333,   342,   351,   411,
      414,   418,   422,   427,   477,   481,   486,   490,   494,   550,
-     558,   570,   574,   578,   587,   591,   595,   604,   608,   615,
-     621,   629,   639,   640,   644,   645,   646,   647,   651,   698,
-     698,   704,   703,   722,   735,   751,   765,   769,   775,   785,
-     796,   805,   812,   822,   831,   838,   843,   846,   856,   865,
-     873,   882,   891,   900,   903
+     558,   589,   599,   612,   637,   647,   660,   669,   673,   680,
+     686,   694,   704,   705,   709,   710,   711,   712,   716,   763,
+     763,   769,   768,   787,   800,   816,   830,   834,   840,   850,
+     861,   870,   877,   887,   896,   903,   908,   911,   921,   930,
+     938,   947,   956,   965,   968
 };
 #endif
 
@@ -1836,7 +1836,26 @@ yyreduce:
 #line 558 "syntaxique.y"
                                                        {
         initAttributeValue(&(yyval.attr));
+
+        if(strcmp((yyvsp[-3].strVal),"size")==0){
+            yyerror("Size attribute is not supposed to have string value");
+        }
+
+        //if the name is type , value needs to be one of the following strings : int, float, string, boolean
+        char tmp[15] ;
+        sprintf(tmp, "%s", (yyvsp[-1].strVal));
+        if(strcmp((yyvsp[-3].strVal),"type")==0){
+            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes((yyvsp[-1].strVal)),"float")!=0 && strcmp(trimQuotes((yyvsp[-1].strVal)),"string")!=0 && strcmp(trimQuotes((yyvsp[-1].strVal)),"boolean")!=0){
+                yyerror("Invalid value for type attribute");
+            }
+        }
+
+
         if (strcmp((yyvsp[-3].strVal),"name") == 0) {
+            //check if the value is a string and can be identifier like alpha numeric
+            if (!isIdentifier(trimQuotes(tmp))) {
+                yyerror("Invalid value for name attribute");
+            }
             addAttribute(&(yyval.attr), trimQuotes((yyvsp[-1].strVal)),"value" , TYPE_STRING);
         } else {
             addAttribute(&(yyval.attr), (yyvsp[-3].strVal), (yyvsp[-1].strVal), TYPE_STRING);
@@ -1846,61 +1865,107 @@ yyreduce:
             addAttribute(&(yyval.attr), (yyvsp[0].attr).attrs[i].name, (yyvsp[0].attr).attrs[i].value, (yyvsp[0].attr).attrs[i].type);
         }
     }
-#line 1850 "syntaxique.tab.c"
+#line 1869 "syntaxique.tab.c"
     break;
 
   case 31: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes  */
-#line 570 "syntaxique.y"
+#line 589 "syntaxique.y"
                                                                                                              {
         initAttributeValue(&(yyval.attr));
+        if(strcmp((yyvsp[-5].strVal),"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp((yyvsp[-5].strVal),"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&(yyval.attr), (yyvsp[-5].strVal), (yyvsp[-2].strVal), TYPE_INTEGER);
     }
-#line 1859 "syntaxique.tab.c"
+#line 1884 "syntaxique.tab.c"
     break;
 
   case 32: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes  */
-#line 574 "syntaxique.y"
+#line 599 "syntaxique.y"
                                                                                                         {
         initAttributeValue(&(yyval.attr));
+        if(strcmp((yyvsp[-5].strVal),"size")==0){
+            yyerror("Size attribute is not supposed to have logic expression value");
+        }
+        if(strcmp((yyvsp[-5].strVal),"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp((yyvsp[-5].strVal),"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&(yyval.attr), (yyvsp[-5].strVal), (yyvsp[-2].strVal), TYPE_BOOLEAN);
     }
-#line 1868 "syntaxique.tab.c"
+#line 1902 "syntaxique.tab.c"
     break;
 
   case 33: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING  */
-#line 578 "syntaxique.y"
+#line 612 "syntaxique.y"
                                               {
         initAttributeValue(&(yyval.attr));
+
+        if(strcmp((yyvsp[-2].strVal),"size")==0){
+            yyerror("Size attribute is not supposed to have string value");
+        }
+
+        //if the name is type , value needs to be one of the following strings : int, float, string, boolean
+        char tmp[15] ;
+        sprintf(tmp, "%s", (yyvsp[0].strVal));
+        if(strcmp((yyvsp[-2].strVal),"type")==0){
+            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes((yyvsp[0].strVal)),"float")!=0 && strcmp(trimQuotes((yyvsp[0].strVal)),"string")!=0 && strcmp(trimQuotes((yyvsp[0].strVal)),"boolean")!=0){
+                yyerror("Invalid value for type attribute");
+            }
+        }
+
         if (strcmp((yyvsp[-2].strVal),"name") == 0) {
+            if (!isIdentifier(trimQuotes(tmp))) {
+                yyerror("Invalid value for name attribute");
+            }
             addAttribute(&(yyval.attr), trimQuotes((yyvsp[0].strVal)), "value" , TYPE_STRING);
         } else {
             addAttribute(&(yyval.attr), (yyvsp[-2].strVal), (yyvsp[0].strVal), TYPE_STRING);
         }
-
     }
-#line 1882 "syntaxique.tab.c"
+#line 1932 "syntaxique.tab.c"
     break;
 
   case 34: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS  */
-#line 587 "syntaxique.y"
+#line 637 "syntaxique.y"
                                                                                                   {
         initAttributeValue(&(yyval.attr));
+        if(strcmp((yyvsp[-4].strVal),"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp((yyvsp[-4].strVal),"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&(yyval.attr), (yyvsp[-4].strVal), (yyvsp[-1].strVal), TYPE_INTEGER);
     }
-#line 1891 "syntaxique.tab.c"
+#line 1947 "syntaxique.tab.c"
     break;
 
   case 35: /* attributes: IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS  */
-#line 591 "syntaxique.y"
+#line 647 "syntaxique.y"
                                                                                              {
         initAttributeValue(&(yyval.attr));
+        if(strcmp((yyvsp[-4].strVal),"size")==0){
+            yyerror("Size attribute is not supposed to have logic expression value");
+        }
+        if(strcmp((yyvsp[-4].strVal),"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp((yyvsp[-4].strVal),"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&(yyval.attr), (yyvsp[-4].strVal), (yyvsp[-1].strVal), TYPE_BOOLEAN);
     }
-#line 1900 "syntaxique.tab.c"
+#line 1965 "syntaxique.tab.c"
     break;
 
   case 36: /* attributes: array_reference TOKEN_ASSIGN TOKEN_STRING  */
-#line 595 "syntaxique.y"
+#line 660 "syntaxique.y"
                                                 {
         initAttributeValue(&(yyval.attr));
         if (strcmp((yyvsp[-2].strVal),"name") == 0) {
@@ -1910,29 +1975,29 @@ yyreduce:
         }
 
     }
-#line 1914 "syntaxique.tab.c"
+#line 1979 "syntaxique.tab.c"
     break;
 
   case 37: /* attributes: array_reference TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS  */
-#line 604 "syntaxique.y"
+#line 669 "syntaxique.y"
                                                                                                    {
         initAttributeValue(&(yyval.attr));
         addAttribute(&(yyval.attr), (yyvsp[-4].strVal), (yyvsp[-1].strVal), TYPE_INTEGER);
     }
-#line 1923 "syntaxique.tab.c"
+#line 1988 "syntaxique.tab.c"
     break;
 
   case 38: /* attributes: array_reference TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS  */
-#line 608 "syntaxique.y"
+#line 673 "syntaxique.y"
                                                                                               {
         initAttributeValue(&(yyval.attr));
         addAttribute(&(yyval.attr), (yyvsp[-4].strVal), (yyvsp[-1].strVal), TYPE_BOOLEAN);
     }
-#line 1932 "syntaxique.tab.c"
+#line 1997 "syntaxique.tab.c"
     break;
 
   case 39: /* elements: element elements  */
-#line 615 "syntaxique.y"
+#line 680 "syntaxique.y"
                     {
     addElement(&(yyvsp[0].elementsValues), (yyvsp[-1].strVal));
     //print elements
@@ -1940,21 +2005,21 @@ yyreduce:
     }
     (yyval.elementsValues) = (yyvsp[0].elementsValues);
    }
-#line 1944 "syntaxique.tab.c"
+#line 2009 "syntaxique.tab.c"
     break;
 
   case 40: /* elements: %empty  */
-#line 621 "syntaxique.y"
+#line 686 "syntaxique.y"
                   {
         elementsArray ea;
         ea.count = 0;
         (yyval.elementsValues) = ea;
    }
-#line 1954 "syntaxique.tab.c"
+#line 2019 "syntaxique.tab.c"
     break;
 
   case 41: /* element: TOKEN_ELEMENT_OPEN attributes TOKEN_SELF_CLOSING_TAG  */
-#line 629 "syntaxique.y"
+#line 694 "syntaxique.y"
                                                        {
     if(strcmp((yyvsp[-1].attr).attrs[0].name, "value") == 0){
         char temp[15];
@@ -1962,11 +2027,11 @@ yyreduce:
         (yyval.strVal) = strdup(temp);
     }
    }
-#line 1966 "syntaxique.tab.c"
+#line 2031 "syntaxique.tab.c"
     break;
 
   case 48: /* assignment: TOKEN_ASSIGN_OPEN attributes TOKEN_SELF_CLOSING_TAG  */
-#line 651 "syntaxique.y"
+#line 716 "syntaxique.y"
                                                         {
         //update the value of a variable
         SymbolEntry* entry;
@@ -2009,21 +2074,21 @@ yyreduce:
         } //TODO: handle array type and array refernec type
         createQuad(":=", temp, "", (yyvsp[-1].attr).attrs[0].name);
 }
-#line 2013 "syntaxique.tab.c"
+#line 2078 "syntaxique.tab.c"
     break;
 
   case 49: /* $@5: %empty  */
-#line 698 "syntaxique.y"
+#line 763 "syntaxique.y"
                                                {
     char temp[15];
     sprintf(temp, "%d", QC);
     strcpy(quad[sauv_begin_if[top_begin_if--]].opr1, temp);
    }
-#line 2023 "syntaxique.tab.c"
+#line 2088 "syntaxique.tab.c"
     break;
 
   case 51: /* $@6: %empty  */
-#line 704 "syntaxique.y"
+#line 769 "syntaxique.y"
                     {
 
     sauv_fin_if[++top_fin_if] = QC;
@@ -2033,21 +2098,21 @@ yyreduce:
     sprintf(temp, "%d", QC);
     strcpy(quad[sauv_begin_if[top_begin_if--]].opr1, temp);
    }
-#line 2037 "syntaxique.tab.c"
+#line 2102 "syntaxique.tab.c"
     break;
 
   case 52: /* if_statement: if_condition TOKEN_END_TAG instruction_list $@6 TOKEN_ELSE instruction_list TOKEN_IF_CLOSE  */
-#line 715 "syntaxique.y"
+#line 780 "syntaxique.y"
                   {
     char temp[15];
     sprintf(temp, "%d", QC);
     strcpy(quad[sauv_fin_if[top_fin_if--]].opr1, temp);
    }
-#line 2047 "syntaxique.tab.c"
+#line 2112 "syntaxique.tab.c"
     break;
 
   case 53: /* if_condition: TOKEN_IF_OPEN attributes  */
-#line 722 "syntaxique.y"
+#line 787 "syntaxique.y"
                          {
 
     if (strcmp((yyvsp[0].attr).attrs[0].name, "condition") == 0) {
@@ -2059,11 +2124,11 @@ yyreduce:
         yyerror("Invalid attribute for if statement");
     }
    }
-#line 2063 "syntaxique.tab.c"
+#line 2128 "syntaxique.tab.c"
     break;
 
   case 54: /* while_statement: while_condition TOKEN_END_TAG instruction_list TOKEN_WHILE_CLOSE  */
-#line 737 "syntaxique.y"
+#line 802 "syntaxique.y"
                      {
     int begin_while = sauv_begin_While[top_begin_While--];
     char temp[15];
@@ -2076,11 +2141,11 @@ yyreduce:
     
 
    }
-#line 2080 "syntaxique.tab.c"
+#line 2145 "syntaxique.tab.c"
     break;
 
   case 55: /* while_condition: TOKEN_WHILE_OPEN attributes  */
-#line 751 "syntaxique.y"
+#line 816 "syntaxique.y"
                                 {
 
     if (strcmp((yyvsp[0].attr).attrs[0].name, "condition") == 0) {
@@ -2093,22 +2158,22 @@ yyreduce:
         yyerror("Invalid attribute for if statement");
     }
     }
-#line 2097 "syntaxique.tab.c"
+#line 2162 "syntaxique.tab.c"
     break;
 
   case 57: /* expr_arithmetique: terme  */
-#line 769 "syntaxique.y"
+#line 834 "syntaxique.y"
          {
     char temp[15];
     sprintf(temp, "%s", (yyvsp[0].strVal));
     (yyval.strVal) = strdup(temp);
 
    }
-#line 2108 "syntaxique.tab.c"
+#line 2173 "syntaxique.tab.c"
     break;
 
   case 58: /* expr_arithmetique: expr_arithmetique TOKEN_PLUS terme  */
-#line 775 "syntaxique.y"
+#line 840 "syntaxique.y"
                                         {
     char temp[15];
     char opr1[15];
@@ -2119,11 +2184,11 @@ yyreduce:
      createQuad("+", opr1, opr2, temp);
     (yyval.strVal) = strdup(temp);
    }
-#line 2123 "syntaxique.tab.c"
+#line 2188 "syntaxique.tab.c"
     break;
 
   case 59: /* expr_arithmetique: expr_arithmetique TOKEN_MINUS terme  */
-#line 785 "syntaxique.y"
+#line 850 "syntaxique.y"
                                          { 
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2132,11 +2197,11 @@ yyreduce:
     (yyval.strVal) = strdup(temp);
 
    }
-#line 2136 "syntaxique.tab.c"
+#line 2201 "syntaxique.tab.c"
     break;
 
   case 60: /* terme: facteur  */
-#line 796 "syntaxique.y"
+#line 861 "syntaxique.y"
            {
     
     // strcpy($$, $1);
@@ -2146,11 +2211,11 @@ yyreduce:
 
     (yyval.strVal) = strdup(temp);
    }
-#line 2150 "syntaxique.tab.c"
+#line 2215 "syntaxique.tab.c"
     break;
 
   case 61: /* terme: terme TOKEN_MULTIPLY facteur  */
-#line 805 "syntaxique.y"
+#line 870 "syntaxique.y"
                                   { 
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2158,11 +2223,11 @@ yyreduce:
     //  sprintf($$, "%s", temp);
     (yyval.strVal) = strdup(temp);
     }
-#line 2162 "syntaxique.tab.c"
+#line 2227 "syntaxique.tab.c"
     break;
 
   case 62: /* terme: terme TOKEN_DIVIDE facteur  */
-#line 812 "syntaxique.y"
+#line 877 "syntaxique.y"
                                 {
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2170,11 +2235,11 @@ yyreduce:
     //  sprintf($$, "%s", temp);
     (yyval.strVal) = strdup(temp);
      }
-#line 2174 "syntaxique.tab.c"
+#line 2239 "syntaxique.tab.c"
     break;
 
   case 63: /* facteur: TOKEN_INT  */
-#line 822 "syntaxique.y"
+#line 887 "syntaxique.y"
               { 
 
     // printf("heloo");
@@ -2184,11 +2249,11 @@ yyreduce:
     (yyval.strVal) = strdup(temp);
 
     }
-#line 2188 "syntaxique.tab.c"
+#line 2253 "syntaxique.tab.c"
     break;
 
   case 64: /* facteur: TOKEN_FLOAT  */
-#line 831 "syntaxique.y"
+#line 896 "syntaxique.y"
                   { 
 
     char temp[15];
@@ -2196,29 +2261,29 @@ yyreduce:
 
     (yyval.strVal) = strdup(temp);
     }
-#line 2200 "syntaxique.tab.c"
+#line 2265 "syntaxique.tab.c"
     break;
 
   case 65: /* facteur: IDENTIFICATEUR  */
-#line 838 "syntaxique.y"
+#line 903 "syntaxique.y"
                      {
     char temp[15];
     sprintf(temp, "%s", (yyvsp[0].strVal));
     (yyval.strVal) = strdup(temp);
     }
-#line 2210 "syntaxique.tab.c"
+#line 2275 "syntaxique.tab.c"
     break;
 
   case 66: /* facteur: array_reference  */
-#line 843 "syntaxique.y"
+#line 908 "syntaxique.y"
                       {
         (yyval.strVal) = (yyvsp[0].strVal);
     }
-#line 2218 "syntaxique.tab.c"
+#line 2283 "syntaxique.tab.c"
     break;
 
   case 67: /* facteur: TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS  */
-#line 846 "syntaxique.y"
+#line 911 "syntaxique.y"
                                                                        {
     // $$ = $2
         char temp[15];
@@ -2226,11 +2291,11 @@ yyreduce:
 
         (yyval.strVal) = strdup(temp);
     }
-#line 2230 "syntaxique.tab.c"
+#line 2295 "syntaxique.tab.c"
     break;
 
   case 68: /* expr_logique: expr_arithmetique TOKEN_EQUAL expr_arithmetique  */
-#line 856 "syntaxique.y"
+#line 921 "syntaxique.y"
                                                    {
 
     char tmp3[15];
@@ -2240,11 +2305,11 @@ yyreduce:
 // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2244 "syntaxique.tab.c"
+#line 2309 "syntaxique.tab.c"
     break;
 
   case 69: /* expr_logique: expr_arithmetique TOKEN_GREATER_THAN expr_arithmetique  */
-#line 865 "syntaxique.y"
+#line 930 "syntaxique.y"
                                                             {
 
     
@@ -2253,11 +2318,11 @@ yyreduce:
     createQuad(">", (yyvsp[-2].strVal), (yyvsp[0].strVal), tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2257 "syntaxique.tab.c"
+#line 2322 "syntaxique.tab.c"
     break;
 
   case 70: /* expr_logique: expr_arithmetique TOKEN_LOWER_THAN expr_arithmetique  */
-#line 873 "syntaxique.y"
+#line 938 "syntaxique.y"
                                                           {
 
     char tmp3[15];
@@ -2267,11 +2332,11 @@ yyreduce:
     // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2271 "syntaxique.tab.c"
+#line 2336 "syntaxique.tab.c"
     break;
 
   case 71: /* expr_logique: expr_arithmetique TOKEN_GREATER_OR_EQUAL expr_arithmetique  */
-#line 882 "syntaxique.y"
+#line 947 "syntaxique.y"
                                                                  {
 
     char tmp3[15];
@@ -2281,11 +2346,11 @@ yyreduce:
 // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2285 "syntaxique.tab.c"
+#line 2350 "syntaxique.tab.c"
     break;
 
   case 72: /* expr_logique: expr_arithmetique TOKEN_LOWER_OR_EQUAL expr_arithmetique  */
-#line 891 "syntaxique.y"
+#line 956 "syntaxique.y"
                                                               {
 
     char tmp3[15];
@@ -2295,19 +2360,19 @@ yyreduce:
 // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2299 "syntaxique.tab.c"
+#line 2364 "syntaxique.tab.c"
     break;
 
   case 73: /* expr_logique: TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS  */
-#line 900 "syntaxique.y"
+#line 965 "syntaxique.y"
                                                                  {
     (yyval.strVal) = strdup((yyvsp[-1].strVal));
   }
-#line 2307 "syntaxique.tab.c"
+#line 2372 "syntaxique.tab.c"
     break;
 
   case 74: /* expr_logique: TOKEN_BOOLEAN  */
-#line 903 "syntaxique.y"
+#line 968 "syntaxique.y"
                    {
     // sprintf($$, "%d", $1);
     char temp[15];
@@ -2315,11 +2380,11 @@ yyreduce:
     (yyval.strVal) = strdup(temp);
     
    }
-#line 2319 "syntaxique.tab.c"
+#line 2384 "syntaxique.tab.c"
     break;
 
 
-#line 2323 "syntaxique.tab.c"
+#line 2388 "syntaxique.tab.c"
 
       default: break;
     }
@@ -2512,7 +2577,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 912 "syntaxique.y"
+#line 977 "syntaxique.y"
 
 
 void yysuccess(char *s){

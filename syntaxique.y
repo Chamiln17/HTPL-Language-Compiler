@@ -557,7 +557,26 @@ array_reference:
 attributes:
    IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING attributes {
         initAttributeValue(&$$);
+
+        if(strcmp($1,"size")==0){
+            yyerror("Size attribute is not supposed to have string value");
+        }
+
+        //if the name is type , value needs to be one of the following strings : int, float, string, boolean
+        char tmp[15] ;
+        sprintf(tmp, "%s", $3);
+        if(strcmp($1,"type")==0){
+            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes($3),"float")!=0 && strcmp(trimQuotes($3),"string")!=0 && strcmp(trimQuotes($3),"boolean")!=0){
+                yyerror("Invalid value for type attribute");
+            }
+        }
+
+
         if (strcmp($1,"name") == 0) {
+            //check if the value is a string and can be identifier like alpha numeric
+            if (!isIdentifier(trimQuotes(tmp))) {
+                yyerror("Invalid value for name attribute");
+            }
             addAttribute(&$$, trimQuotes($3),"value" , TYPE_STRING);
         } else {
             addAttribute(&$$, $1, $3, TYPE_STRING);
@@ -569,27 +588,73 @@ attributes:
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS attributes {
         initAttributeValue(&$$);
+        if(strcmp($1,"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp($1,"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&$$, $1, $4, TYPE_INTEGER);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS attributes {
         initAttributeValue(&$$);
+        if(strcmp($1,"size")==0){
+            yyerror("Size attribute is not supposed to have logic expression value");
+        }
+        if(strcmp($1,"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp($1,"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&$$, $1, $4, TYPE_BOOLEAN);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_STRING {
         initAttributeValue(&$$);
+
+        if(strcmp($1,"size")==0){
+            yyerror("Size attribute is not supposed to have string value");
+        }
+
+        //if the name is type , value needs to be one of the following strings : int, float, string, boolean
+        char tmp[15] ;
+        sprintf(tmp, "%s", $3);
+        if(strcmp($1,"type")==0){
+            if(strcmp(trimQuotes(tmp),"int")!=0 && strcmp(trimQuotes($3),"float")!=0 && strcmp(trimQuotes($3),"string")!=0 && strcmp(trimQuotes($3),"boolean")!=0){
+                yyerror("Invalid value for type attribute");
+            }
+        }
+
         if (strcmp($1,"name") == 0) {
+            if (!isIdentifier(trimQuotes(tmp))) {
+                yyerror("Invalid value for name attribute");
+            }
             addAttribute(&$$, trimQuotes($3), "value" , TYPE_STRING);
         } else {
             addAttribute(&$$, $1, $3, TYPE_STRING);
         }
-
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS {
         initAttributeValue(&$$);
+        if(strcmp($1,"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp($1,"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&$$, $1, $4, TYPE_INTEGER);
     }
    | IDENTIFICATEUR TOKEN_ASSIGN TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS {
         initAttributeValue(&$$);
+        if(strcmp($1,"size")==0){
+            yyerror("Size attribute is not supposed to have logic expression value");
+        }
+        if(strcmp($1,"name")==0){
+            yyerror("name attribute is not supposed to have non string value");
+        }
+        if(strcmp($1,"type")==0){
+            yyerror("type attribute is not supposed to have non string value");
+        }
         addAttribute(&$$, $1, $4, TYPE_BOOLEAN);
     }
     | array_reference TOKEN_ASSIGN TOKEN_STRING {
