@@ -113,73 +113,76 @@ bool removeSymbol(SymbolTable *table, const char *name)
 }
 
 // Mettre à jour la valeur d'un symbole
-// bool updateSymbolValue(SymbolTable* table, const char* name, void* value) {
-//     SymbolEntry* symbol = findSymbol(table, name);
+bool updateSymbolValue(SymbolTable *table, const char *name, ArrayInfo arrayInfo) {
+    SymbolEntry *symbol = findSymbol(table, name);
+    if (!symbol) {
+        printf("Symbole '%s' non trouve.\n", name);
+        return false;
+    }
 
-//     if (!symbol) {
-//         printf("Symbole '%s' non trouve.\n", name);
-//         return false;
-//     }
+    // We can only update array information
+    if (symbol->type != TYPE_ARRAY) {
+        printf("Le symbole n'est pas un tableau.\n");
+        return false;
+    }
 
-//     switch (symbol->type) {
-//         case TYPE_INTEGER:
-//             symbol->value.int_value = *(int*)value;
-//             break;
-//         case TYPE_FLOAT:
-//             symbol->value.float_value = *(float*)value;
-//             break;
-//         case TYPE_STRING:
-//             if (symbol->value.string_value) {
-//                 free(symbol->value.string_value);
-//             }
-//             symbol->value.string_value = strdup(*(char**)value);
-//             break;
-//         case TYPE_BOOLEAN:
-//             symbol->value.bool_value = *(bool*)value;
-//             break;
-//         default:
-//             printf("Type de donnees non supporte.\n");
-//             return false;
-//     }
+    // Update array information
+    symbol->Details.arrayInfo.elementType = arrayInfo.elementType;
+    symbol->Details.arrayInfo.size = arrayInfo.size;
 
-//     symbol->is_initialized = true;
-//     return true;
-// }
+    return true;
+}
 
 // Afficher la table des symboles
 void printSymbolTable(SymbolTable *table)
 {
     printf("Table des symboles :\n");
     printf("---------------------\n");
-
     for (int i = 0; i < TABLE_SIZE; i++)
     {
         SymbolEntry *current = table->entries[i];
         while (current)
         {
             printf("Nom: %s | Type: ", current->name);
-
             switch (current->type)
             {
-            case TYPE_INTEGER:
-                printf("entier");
-                break;
-            case TYPE_FLOAT:
-                printf("flottant");
-                break;
-            case TYPE_STRING:
-                printf("chaine");
-                break;
-            case TYPE_BOOLEAN:
-                printf("booleen");
-                break;
-            case TYPE_ARRAY:
-                printf("tableau");
-                break;
-            default:
-                printf("non defini");
+                case TYPE_INTEGER:
+                    printf("entier");
+                    break;
+                case TYPE_FLOAT:
+                    printf("flottant");
+                    break;
+                case TYPE_STRING:
+                    printf("chaine");
+                    break;
+                case TYPE_BOOLEAN:
+                    printf("booleen");
+                    break;
+                case TYPE_ARRAY:
+                    printf("tableau [");
+                    // Print array element type
+                    switch (current->Details.arrayInfo.elementType)
+                    {
+                        case TYPE_INTEGER:
+                            printf("entier");
+                            break;
+                        case TYPE_FLOAT:
+                            printf("flottant");
+                            break;
+                        case TYPE_STRING:
+                            printf("chaine");
+                            break;
+                        case TYPE_BOOLEAN:
+                            printf("booleen");
+                            break;
+                        default:
+                            printf("type non defini");
+                    }
+                    printf(", taille: %d]", current->Details.arrayInfo.size);
+                    break;
+                default:
+                    printf("non defini");
             }
-
             printf("\n");
             current = current->next;
         }

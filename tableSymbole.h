@@ -13,22 +13,21 @@ typedef enum
     TYPE_UNDEFINED
 } DataType;
 
+#define TABLE_SIZE 1000
+
+typedef struct ArrayInfo {
+    DataType elementType;
+    int size;
+} ArrayInfo;
 typedef struct SymbolEntry
 {
     char *name;
     DataType type;
-    // int memory_address;
-    // bool is_initialized;
-    // union {
-    //     int int_value;
-    //     float float_value;
-    //     char* string_value;
-    //     bool bool_value;
-    // } value;
+    union {
+        ArrayInfo arrayInfo;
+    } Details;
     struct SymbolEntry *next;
 } SymbolEntry;
-
-#define TABLE_SIZE 1000
 
 typedef struct
 {
@@ -39,7 +38,7 @@ void initSymbolTable(SymbolTable *table);
 bool addSymbol(SymbolTable *table, const char *name, DataType type);
 SymbolEntry *findSymbol(SymbolTable *table, const char *name);
 bool removeSymbol(SymbolTable *table, const char *name);
-bool updateSymbolValue(SymbolTable *table, const char *name, void *value);
+bool updateSymbolValue(SymbolTable *table, const char *name, ArrayInfo arrayInfo);
 void printSymbolTable(SymbolTable *table);
 void freeSymbolTable(SymbolTable *table);
 // DataType getVariableType(SymbolTable *table, const char *name);

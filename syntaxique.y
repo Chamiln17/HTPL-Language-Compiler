@@ -260,10 +260,10 @@ declaration_list:
                 arrayName = $2.attrs[0].name;
             }
         for(int i = 1; i < $2.count; i++) {
-            printf("Attribute name: %s\n", $2.attrs[i].name);
+            printf("name: %s\n", $2.attrs[i].name);
             
             if (strcmp($2.attrs[i].name, "type") == 0) {
-                arrayType = $2.attrs[i].value;
+                arrayType = trimQuotes($2.attrs[i].value);
                 // Convert string type to DataType enum
                 if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
                 else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
@@ -285,6 +285,12 @@ declaration_list:
         if (!added) {
             yyerror("Failed to add array to symbol table");
         }
+        ArrayInfo arrayDetails;
+        
+        arrayDetails.elementType = type;  
+        arrayDetails.size = arraySize;    
+        updateSymbolValue(&symbolTable, arrayName, arrayDetails);
+
 
         // Generate quadruplets for array declaration
         char sizeStr[15];
@@ -307,8 +313,7 @@ declaration_list:
    }
    | TOKEN_VAR_INT_OPEN attributes TOKEN_END_TAG expr_arithmetique TOKEN_VAR_INT_CLOSE {
         addSymbol(&symbolTable, $2.attrs[0].name, TYPE_INTEGER);
-        printf("Declaration:" );
-        printf("Name: %s\n", $4);
+        
         char temp[15];
         sprintf(temp, "%s", $4);
         if (!isInteger(temp) && !isVariable(temp)) {
@@ -355,10 +360,10 @@ declaration_list:
                 arrayName = $2.attrs[0].name;
             }
         for(int i = 1; i < $2.count; i++) {
-            printf("Attribute name: %s\n", $2.attrs[i].name);
-            
+            printf("name: %s\n", $2.attrs[i].name);
+            printf("value: %s\n", $2.attrs[i].value);
             if (strcmp($2.attrs[i].name, "type") == 0) {
-                arrayType = $2.attrs[i].value;
+            arrayType = trimQuotes($2.attrs[i].value);
                 // Convert string type to DataType enum
                 if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
                 else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
@@ -380,6 +385,10 @@ declaration_list:
         if (!added) {
             yyerror("Failed to add array to symbol table");
         }
+        ArrayInfo arrayDetails;
+        arrayDetails.elementType = type;
+        arrayDetails.size = arraySize;
+        updateSymbolValue(&symbolTable, arrayName, arrayDetails);
 
         // Generate quadruplets for array declaration
         char sizeStr[15];
@@ -427,10 +436,8 @@ declaration_list:
                 arrayName = $2.attrs[0].name;
             }
         for(int i = 1; i < $2.count; i++) {
-            printf("Attribute name: %s\n", $2.attrs[i].name);
-            
             if (strcmp($2.attrs[i].name, "type") == 0) {
-                arrayType = $2.attrs[i].value;
+                arrayType = trimQuotes($2.attrs[i].value);
                 // Convert string type to DataType enum
                 if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
                 else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
@@ -452,6 +459,10 @@ declaration_list:
         if (!added) {
             yyerror("Failed to add array to symbol table");
         }
+        ArrayInfo arrayDetails;
+        arrayDetails.elementType = type;
+        arrayDetails.size = arraySize;
+        updateSymbolValue(&symbolTable, arrayName, arrayDetails);
 
         // Generate quadruplets for array declaration
         char sizeStr[15];
@@ -492,10 +503,10 @@ declaration_list:
                 arrayName = $2.attrs[0].name;
             }
         for(int i = 1; i < $2.count; i++) {
-            printf("Attribute name: %s\n", $2.attrs[i].name);
-            
+                        printf("name: %s\n", $2.attrs[i].name);
+
             if (strcmp($2.attrs[i].name, "type") == 0) {
-                arrayType = $2.attrs[i].value;
+                arrayType = trimQuotes($2.attrs[i].value);
                 // Convert string type to DataType enum
                 if (strcmp(arrayType, "int") == 0) type = TYPE_INTEGER;
                 else if (strcmp(arrayType, "float") == 0) type = TYPE_FLOAT;
@@ -517,6 +528,10 @@ declaration_list:
         if (!added) {
             yyerror("Failed to add array to symbol table");
         }
+        ArrayInfo arrayDetails;
+        arrayDetails.elementType = type;
+        arrayDetails.size = arraySize;
+        updateSymbolValue(&symbolTable, arrayName, arrayDetails);
 
         // Generate quadruplets for array declaration
         char sizeStr[15];
@@ -601,7 +616,6 @@ elements:
     addElement(&$2, $1);
     //print elements
     for(int i = 0; i < $2.count; i++) {
-        printf("Element %d: %s\n", i, $2.values[i]);
     }
     $$ = $2;
    } | /* void */ {
@@ -824,7 +838,6 @@ facteur:
     | IDENTIFICATEUR {
     char temp[15];
     sprintf(temp, "%s", $1);
-    printf("Debug - Facteur IDENTIFICATEUR: %s\n", $1);
     $$ = strdup(temp);
     }
     | array_reference {
