@@ -719,9 +719,9 @@ static const yytype_int16 yyrline[] =
      470,   474,   478,   483,   533,   537,   542,   546,   550,   606,
      631,   666,   680,   693,   722,   735,   748,   753,   757,   764,
      770,   778,   788,   789,   793,   794,   795,   796,   800,   875,
-     875,   881,   880,   899,   912,   928,   942,   946,   952,   962,
-     973,   982,   989,   999,  1008,  1015,  1020,  1023,  1033,  1042,
-    1050,  1059,  1068,  1077,  1080
+     875,   881,   880,   899,   912,   928,   942,   946,   973,   983,
+     994,  1002,  1009,  1019,  1028,  1035,  1044,  1047,  1057,  1066,
+    1074,  1083,  1092,  1101,  1104
 };
 #endif
 
@@ -2278,14 +2278,35 @@ yyreduce:
          {
     char temp[15];
     sprintf(temp, "%s", (yyvsp[0].strVal));
+    ///check if tere is an array reference if yes check if type is int or float
+    if(isArrayReference(temp)){
+        char* arrayName = getArrayName(temp);
+        int index = getArrayIndex(temp);
+        SymbolEntry* entry = findSymbol(&symbolTable, arrayName);
+        if (!entry) {
+            yyerror("Array undefined");
+        }
+        if (entry->type != TYPE_ARRAY) {
+            yyerror("Variable is not an array");
+        }
+        //check for index out of bound
+        if(index > entry->Details.arrayInfo.size || index < 1){
+            yyerror("Index out of bound");
+        }
+        if(entry->Details.arrayInfo.elementType == TYPE_INTEGER){
+            yyerror("Invalid value for arith expression");
+        }
+        free(arrayName);
+    }
+
     (yyval.strVal) = strdup(temp);
 
    }
-#line 2285 "syntaxique.tab.c"
+#line 2306 "syntaxique.tab.c"
     break;
 
   case 58: /* expr_arithmetique: expr_arithmetique TOKEN_PLUS terme  */
-#line 952 "syntaxique.y"
+#line 973 "syntaxique.y"
                                         {
     char temp[15];
     char opr1[15];
@@ -2296,11 +2317,11 @@ yyreduce:
      createQuad("+", opr1, opr2, temp);
     (yyval.strVal) = strdup(temp);
    }
-#line 2300 "syntaxique.tab.c"
+#line 2321 "syntaxique.tab.c"
     break;
 
   case 59: /* expr_arithmetique: expr_arithmetique TOKEN_MINUS terme  */
-#line 962 "syntaxique.y"
+#line 983 "syntaxique.y"
                                          { 
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2309,25 +2330,24 @@ yyreduce:
     (yyval.strVal) = strdup(temp);
 
    }
-#line 2313 "syntaxique.tab.c"
+#line 2334 "syntaxique.tab.c"
     break;
 
   case 60: /* terme: facteur  */
-#line 973 "syntaxique.y"
+#line 994 "syntaxique.y"
            {
     
     // strcpy($$, $1);
-
     char temp[15];
     sprintf(temp, "%s", (yyvsp[0].strVal));
 
     (yyval.strVal) = strdup(temp);
    }
-#line 2327 "syntaxique.tab.c"
+#line 2347 "syntaxique.tab.c"
     break;
 
   case 61: /* terme: terme TOKEN_MULTIPLY facteur  */
-#line 982 "syntaxique.y"
+#line 1002 "syntaxique.y"
                                   { 
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2335,11 +2355,11 @@ yyreduce:
     //  sprintf($$, "%s", temp);
     (yyval.strVal) = strdup(temp);
     }
-#line 2339 "syntaxique.tab.c"
+#line 2359 "syntaxique.tab.c"
     break;
 
   case 62: /* terme: terme TOKEN_DIVIDE facteur  */
-#line 989 "syntaxique.y"
+#line 1009 "syntaxique.y"
                                 {
     char temp[15];
     sprintf(temp, "T%d", ti++);
@@ -2347,11 +2367,11 @@ yyreduce:
     //  sprintf($$, "%s", temp);
     (yyval.strVal) = strdup(temp);
      }
-#line 2351 "syntaxique.tab.c"
+#line 2371 "syntaxique.tab.c"
     break;
 
   case 63: /* facteur: TOKEN_INT  */
-#line 999 "syntaxique.y"
+#line 1019 "syntaxique.y"
               { 
 
     // printf("heloo");
@@ -2361,11 +2381,11 @@ yyreduce:
     (yyval.strVal) = strdup(temp);
 
     }
-#line 2365 "syntaxique.tab.c"
+#line 2385 "syntaxique.tab.c"
     break;
 
   case 64: /* facteur: TOKEN_FLOAT  */
-#line 1008 "syntaxique.y"
+#line 1028 "syntaxique.y"
                   { 
 
     char temp[15];
@@ -2373,29 +2393,33 @@ yyreduce:
 
     (yyval.strVal) = strdup(temp);
     }
-#line 2377 "syntaxique.tab.c"
+#line 2397 "syntaxique.tab.c"
     break;
 
   case 65: /* facteur: IDENTIFICATEUR  */
-#line 1015 "syntaxique.y"
+#line 1035 "syntaxique.y"
                      {
     char temp[15];
     sprintf(temp, "%s", (yyvsp[0].strVal));
+    SymbolEntry* entry = findSymbol(&symbolTable, temp);
+    if (!entry) {
+        yyerror("Variable undefined");
+    }
     (yyval.strVal) = strdup(temp);
     }
-#line 2387 "syntaxique.tab.c"
+#line 2411 "syntaxique.tab.c"
     break;
 
   case 66: /* facteur: array_reference  */
-#line 1020 "syntaxique.y"
+#line 1044 "syntaxique.y"
                       {
         (yyval.strVal) = (yyvsp[0].strVal);
     }
-#line 2395 "syntaxique.tab.c"
+#line 2419 "syntaxique.tab.c"
     break;
 
   case 67: /* facteur: TOKEN_OPEN_PARENTHESIS expr_arithmetique TOKEN_CLOSE_PARENTHESIS  */
-#line 1023 "syntaxique.y"
+#line 1047 "syntaxique.y"
                                                                        {
     // $$ = $2
         char temp[15];
@@ -2403,11 +2427,11 @@ yyreduce:
 
         (yyval.strVal) = strdup(temp);
     }
-#line 2407 "syntaxique.tab.c"
+#line 2431 "syntaxique.tab.c"
     break;
 
   case 68: /* expr_logique: expr_arithmetique TOKEN_EQUAL expr_arithmetique  */
-#line 1033 "syntaxique.y"
+#line 1057 "syntaxique.y"
                                                    {
 
     char tmp3[15];
@@ -2417,11 +2441,11 @@ yyreduce:
 // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2421 "syntaxique.tab.c"
+#line 2445 "syntaxique.tab.c"
     break;
 
   case 69: /* expr_logique: expr_arithmetique TOKEN_GREATER_THAN expr_arithmetique  */
-#line 1042 "syntaxique.y"
+#line 1066 "syntaxique.y"
                                                             {
 
     
@@ -2430,11 +2454,11 @@ yyreduce:
     createQuad(">", (yyvsp[-2].strVal), (yyvsp[0].strVal), tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2434 "syntaxique.tab.c"
+#line 2458 "syntaxique.tab.c"
     break;
 
   case 70: /* expr_logique: expr_arithmetique TOKEN_LOWER_THAN expr_arithmetique  */
-#line 1050 "syntaxique.y"
+#line 1074 "syntaxique.y"
                                                           {
 
     char tmp3[15];
@@ -2444,11 +2468,11 @@ yyreduce:
     // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2448 "syntaxique.tab.c"
+#line 2472 "syntaxique.tab.c"
     break;
 
   case 71: /* expr_logique: expr_arithmetique TOKEN_GREATER_OR_EQUAL expr_arithmetique  */
-#line 1059 "syntaxique.y"
+#line 1083 "syntaxique.y"
                                                                  {
 
     char tmp3[15];
@@ -2458,11 +2482,11 @@ yyreduce:
 // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2462 "syntaxique.tab.c"
+#line 2486 "syntaxique.tab.c"
     break;
 
   case 72: /* expr_logique: expr_arithmetique TOKEN_LOWER_OR_EQUAL expr_arithmetique  */
-#line 1068 "syntaxique.y"
+#line 1092 "syntaxique.y"
                                                               {
 
     char tmp3[15];
@@ -2472,19 +2496,19 @@ yyreduce:
 // strcpy($$, tmp3);
     (yyval.strVal) = strdup(tmp3);
   }
-#line 2476 "syntaxique.tab.c"
+#line 2500 "syntaxique.tab.c"
     break;
 
   case 73: /* expr_logique: TOKEN_OPEN_PARENTHESIS expr_logique TOKEN_CLOSE_PARENTHESIS  */
-#line 1077 "syntaxique.y"
+#line 1101 "syntaxique.y"
                                                                  {
     (yyval.strVal) = strdup((yyvsp[-1].strVal));
   }
-#line 2484 "syntaxique.tab.c"
+#line 2508 "syntaxique.tab.c"
     break;
 
   case 74: /* expr_logique: TOKEN_BOOLEAN  */
-#line 1080 "syntaxique.y"
+#line 1104 "syntaxique.y"
                    {
     // sprintf($$, "%d", $1);
     char temp[15];
@@ -2492,11 +2516,11 @@ yyreduce:
     (yyval.strVal) = strdup(temp);
     
    }
-#line 2496 "syntaxique.tab.c"
+#line 2520 "syntaxique.tab.c"
     break;
 
 
-#line 2500 "syntaxique.tab.c"
+#line 2524 "syntaxique.tab.c"
 
       default: break;
     }
@@ -2689,7 +2713,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1089 "syntaxique.y"
+#line 1113 "syntaxique.y"
 
 
 void yysuccess(char *s){

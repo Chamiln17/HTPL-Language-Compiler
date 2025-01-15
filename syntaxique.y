@@ -946,6 +946,27 @@ expr_arithmetique:
    terme {
     char temp[15];
     sprintf(temp, "%s", $1);
+    ///check if tere is an array reference if yes check if type is int or float
+    if(isArrayReference(temp)){
+        char* arrayName = getArrayName(temp);
+        int index = getArrayIndex(temp);
+        SymbolEntry* entry = findSymbol(&symbolTable, arrayName);
+        if (!entry) {
+            yyerror("Array undefined");
+        }
+        if (entry->type != TYPE_ARRAY) {
+            yyerror("Variable is not an array");
+        }
+        //check for index out of bound
+        if(index > entry->Details.arrayInfo.size || index < 1){
+            yyerror("Index out of bound");
+        }
+        if(entry->Details.arrayInfo.elementType == TYPE_INTEGER){
+            yyerror("Invalid value for arith expression");
+        }
+        free(arrayName);
+    }
+
     $$ = strdup(temp);
 
    }
@@ -973,7 +994,6 @@ terme:
    facteur {
     
     // strcpy($$, $1);
-
     char temp[15];
     sprintf(temp, "%s", $1);
 
@@ -1015,6 +1035,10 @@ facteur:
     | IDENTIFICATEUR {
     char temp[15];
     sprintf(temp, "%s", $1);
+    SymbolEntry* entry = findSymbol(&symbolTable, temp);
+    if (!entry) {
+        yyerror("Variable undefined");
+    }
     $$ = strdup(temp);
     }
     | array_reference {

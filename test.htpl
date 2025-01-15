@@ -2,25 +2,25 @@
 <variables>
         <int name="counter">(3)</int>
         <string name="message">"Test"</string>
-        <array name="numbers" type="int" size=(5)>
-            <element value=(5)/>
-            <element value=(6)/>
+        <array name="numbers" type="string" size=(5)>
+            <element value="hi"/>
+            <element value="hello"/>
         </array>
     </variables>
     
     <instructions>
         <print value="Counter initialized to 10"/>
         
-        <while condition=(counter >> 0)>
-            <assign numbers[3]=(3+numbers[3])/>
-            <print value="Counter: + counter"/>
+        <while condition=(counter >> numbers[1])>
+            <assign numbers[3]="why"/>
+            <print value="Counter: + numbers[10]"/>
         </while>
         
         <if condition=(counter == 0)>
             <assign counter=(3 - 1)/>
             <assign counter=(4 - 1)/>
         <else>
-            <assign counter=(counter + 1)/>
+            <assign counter=(numbers[1] + 1)/>
             <assign counter=(counter + 1)/>
         </if>
     </instructions>
