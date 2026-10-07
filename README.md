@@ -39,10 +39,10 @@ Everything happens in a single pass: the parser pulls tokens from the lexer, and
 
 ## Build and run
 
-You need flex (with its library, `libfl-dev`), bison, gcc and make. On Ubuntu or Debian:
+You need flex, bison, gcc and make. On Ubuntu or Debian:
 
 ```sh
-sudo apt install flex libfl-dev bison gcc make
+sudo apt install flex bison gcc make
 ```
 
 On Windows, install [WSL](https://learn.microsoft.com/windows/wsl/install) with Ubuntu and run everything inside it.
@@ -102,7 +102,7 @@ The project was built in three steps. Only the last one is the current compiler.
 ## Current limitations
 
 - Type checking covers declarations and assignments only, and array elements are only partially checked.
-- A `while` loop does not re-evaluate its condition: it jumps back to the test, not to the code that computes it.
+- A `while` loop does not re-evaluate its condition: it jumps back to the test and skips the code that computes the condition.
 - `print` generates no quadruples.
 - Buffers have fixed sizes: quadruple fields hold 14 characters, and an array keeps at most 10 initial elements.
 

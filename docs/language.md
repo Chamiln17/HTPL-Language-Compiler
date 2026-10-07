@@ -333,7 +333,7 @@ These follow from the current code and are not fixed. Each rejected example belo
 
 - **Declaration order in the output.** Self-closing declarations, and arrays followed by more declarations, emit their code after the declarations that follow them. The meaning is unchanged but the quad listing is out of source order.
 - **Array elements are stored in reverse** (see [Arrays](#arrays)).
-- **Loop conditions are evaluated once.** A `while` loop jumps back to its test, not to the code that computes the condition, so the condition value is never recomputed. See [the architecture note](architecture.md#while-loops).
+- **Loop conditions are evaluated once.** A `while` loop jumps back to its test and skips the code that computes the condition, so the condition value is never recomputed. See [the architecture note](architecture.md#while-loops).
 - **`print` generates no code.** Expressions inside its attributes still produce arithmetic quads, but nothing consumes them.
 - **Duplicate declarations** of scalars print `Erreur : Le symbole 'a' existe dejà.` and compilation continues. A duplicate array name is a fatal error.
 - **Error positions.** Errors always report `line 1`; the character position counts from the start of the current line. The first error stops compilation.
@@ -438,7 +438,7 @@ The language annex ([reports/Annexe langage.pdf](reports/Annexe%20langage.pdf)) 
 
 ### Not in the annex
 
-The annex does not mention these grammar features, so they are additions rather than disagreements:
+The grammar adds these features, which the annex does not mention:
 
 - `<else>` inside `<if>` (the second alternative of `if_statement`).
 - The `==` operator (`TOKEN_EQUAL`); §1.2.1 lists only `>>`, `<<`, `>>=` and `<<=`.

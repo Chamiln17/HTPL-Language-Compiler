@@ -37,7 +37,7 @@ Each rule also calls `yysuccess`, which advances the global `currentColumn` by t
 
 Expression rules (`expr_arithmetique`, `terme`, `facteur`, `expr_logique`, `array_reference`) pass strings up the parse tree: a literal (`3`, `2.500000`, `1` for `true`), a variable name, an array reference such as `numbers[1]`, or the name of a temporary such as `T0`. The quadruples are built from these strings.
 
-Attributes go through the `attributes` rule, which collects them into an `AttributeValue`: an array of up to `MAX_ATTRIBUTES` (10) `SingleAttribute` entries, each with a name, a value string and a type. Three details matter:
+Attributes go through the `attributes` rule, which collects them into an `AttributeValue`: an array of up to `MAX_ATTRIBUTES` (10) `SingleAttribute` entries, each with a name, a value string and a type.
 
 - For `name="x"`, `attributes` stores the entry with name `x` and value `"value"`. Declaration actions then read the variable name from `attrs[0].name`.
 - For other attributes the entry is the attribute name and its value, so `<assign counter=(counter + 1)/>` gives an entry with name `counter` and value `T5` (the temporary holding the sum), and the `assignment` action reads the target from `attrs[0].name` and the value from `attrs[0].value`.
@@ -133,7 +133,7 @@ Bison decides which `if_statement` alternative applies by looking at the token a
 2. The body is parsed.
 3. The action at `</while>` pops the saved index, emits `(BR, <saved index>, , )` to loop back, then writes the current `QC` into the `BZ`'s `opr1` so a false condition leaves the loop.
 
-The saved index is the `BZ` itself, not the comparison quad before it. The loop therefore jumps back to the test without recomputing the condition, and the temporary keeps the value it had on entry:
+The saved index is the `BZ` itself, after the comparison quad. The loop therefore jumps back to the test without recomputing the condition, and the temporary keeps the value it had on entry:
 
 ```text
 6- (>, counter, 0, T0)
@@ -143,7 +143,7 @@ The saved index is the `BZ` itself, not the comparison quad before it. The loop 
 10- (BR, 7, , )
 ```
 
-Quad 10 returns to 7, not 6.
+Quad 10 jumps back to the `BZ` at quad 7, skipping the comparison at quad 6.
 
 ## Struct definitions shared by the lexer and the parser
 

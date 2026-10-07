@@ -39,19 +39,19 @@ Tout se fait en une seule passe : l'analyseur syntaxique demande les tokens à l
 
 ## Compiler et exécuter
 
-Il faut flex (avec sa bibliothèque, `libfl-dev`), bison, gcc et make. Sous Ubuntu ou Debian :
+Il faut flex, bison, gcc et make. Sous Ubuntu ou Debian :
 
 ```sh
-sudo apt install flex libfl-dev bison gcc make
+sudo apt install flex bison gcc make
 ```
 
 Sous Windows, installez [WSL](https://learn.microsoft.com/windows/wsl/install) avec Ubuntu et lancez tout à l'intérieur.
 
 ```sh
-make          # build htplc
-make run      # compile examples/test.htpl
-make check    # compare the output with examples/test.expected
-make clean    # remove htplc and the generated sources
+make          # compile htplc
+make run      # compile examples/test.htpl avec htplc
+make check    # compare la sortie avec examples/test.expected
+make clean    # supprime htplc et les sources générées
 ```
 
 `htplc` lit le programme sur l'entrée standard : pour compiler votre propre fichier, lancez `./htplc < program.htpl`.
@@ -102,7 +102,7 @@ Le projet a été construit en trois étapes. Seule la dernière correspond au c
 ## Limites actuelles
 
 - La vérification des types ne couvre que les déclarations et les affectations, et les éléments de tableau ne sont vérifiés qu'en partie.
-- Une boucle `while` ne réévalue pas sa condition : elle revient au test, pas au code qui calcule la condition.
+- Une boucle `while` ne réévalue pas sa condition : elle revient au test et saute le code qui calcule la condition.
 - `print` ne génère aucun quadruplet.
 - Les tampons ont une taille fixe : les champs d'un quadruplet contiennent 14 caractères, et un tableau garde au plus 10 éléments initiaux.
 

@@ -1,9 +1,8 @@
-htplc
-syntaxique
+/htplc
+/syntaxique
 syntaxique.tab.c
 syntaxique.tab.h
 lex.yy.c
-lexical-lexemes
 a.out
 analyseur
 lexer
