@@ -1,0 +1,173 @@
+Token: 259, Content: <program>
+Token: 261, Content: <variables>
+Token: 279, Content: <int
+Token: 304, Content: name
+Token: 300, Content: =
+Token: 288, Content: "counter"
+Token: 277, Content: >
+Token: 298, Content: (
+Token: 305, Content: 3
+Token: 299, Content: )
+Token: 280, Content: </int>
+Token: 285, Content: <string
+Token: 304, Content: name
+Token: 300, Content: =
+Token: 288, Content: "message"
+Token: 277, Content: >
+Token: 288, Content: "Test"
+Token: 286, Content: </string>
+Token: 274, Content: <array
+Token: 304, Content: name
+Token: 300, Content: =
+Token: 288, Content: "numbers"
+Token: 304, Content: type
+Token: 300, Content: =
+Token: 288, Content: "int"
+Token: 304, Content: size
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 305, Content: 5
+Token: 299, Content: )
+Token: 277, Content: >
+Token: 276, Content: <element
+Token: 304, Content: value
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 305, Content: 1
+Token: 299, Content: )
+Token: 278, Content: />
+Token: 276, Content: <element
+Token: 304, Content: value
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 305, Content: 2
+Token: 299, Content: )
+Token: 278, Content: />
+Token: 275, Content: </array>
+Element 0: 2
+Element 0: 2
+Element 1: 1
+Token: 262, Content: </variables>
+Attribute name: type
+Attribute name: size
+Token: 263, Content: <instructions>
+Token: 267, Content: <print
+Token: 304, Content: value
+Token: 300, Content: =
+Token: 288, Content: "Counter initialized to 10"
+Token: 278, Content: />
+Token: 272, Content: <while
+Token: 304, Content: condition
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 304, Content: counter
+Token: 293, Content: >>
+Debug - Facteur IDENTIFICATEUR: counter
+Token: 305, Content: 0
+Token: 299, Content: )
+Token: 277, Content: >
+Token: 265, Content: <assign
+Token: 304, Content: numbers
+Token: 302, Content: [
+Token: 305, Content: 2
+Token: 303, Content: ]
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 304, Content: numbers
+Token: 302, Content: [
+Token: 305, Content: 1
+Token: 303, Content: ]
+Token: 289, Content: +
+Token: 305, Content: 1
+Token: 299, Content: )
+Token: 278, Content: />
+Token: 267, Content: <print
+Token: 304, Content: value
+Token: 300, Content: =
+Token: 288, Content: "Counter: + counter"
+Token: 278, Content: />
+Token: 273, Content: </while>
+Token: 269, Content: <if
+Token: 304, Content: condition
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 304, Content: counter
+Token: 297, Content: ==
+Debug - Facteur IDENTIFICATEUR: counter
+Token: 305, Content: 0
+Token: 299, Content: )
+Token: 277, Content: >
+Token: 265, Content: <assign
+Token: 304, Content: counter
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 305, Content: 3
+Token: 290, Content: -
+Token: 305, Content: 1
+Token: 299, Content: )
+Token: 278, Content: />
+Token: 265, Content: <assign
+Token: 304, Content: counter
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 305, Content: 4
+Token: 290, Content: -
+Token: 305, Content: 1
+Token: 299, Content: )
+Token: 278, Content: />
+Token: 271, Content: <else>
+Token: 265, Content: <assign
+Token: 304, Content: counter
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 304, Content: counter
+Token: 289, Content: +
+Debug - Facteur IDENTIFICATEUR: counter
+Token: 305, Content: 1
+Token: 299, Content: )
+Token: 278, Content: />
+Token: 265, Content: <assign
+Token: 304, Content: counter
+Token: 300, Content: =
+Token: 298, Content: (
+Token: 304, Content: counter
+Token: 289, Content: +
+Debug - Facteur IDENTIFICATEUR: counter
+Token: 305, Content: 1
+Token: 299, Content: )
+Token: 278, Content: />
+Token: 270, Content: </if>
+Token: 264, Content: </instructions>
+Token: 260, Content: </program>
+
+=== Quadruplets ===
+0- (:=, 3, , counter)
+1- (:=, "Test", , message)
+2- (Bounds, 1, 5, )
+3- (ADEC, numbers, , )
+4- (:=, 2, , numbers[1])
+5- (:=, 1, , numbers[2])
+6- (>, counter, 0, T0)
+7- (BZ, 11, , T0)
+8- (+, numbers[1], 1, T1)
+9- (:=, T1, , numbers[2])
+10- (BR, 7, , )
+11- (==, counter, 0, T2)
+12- (BZ, 18, , T2)
+13- (-, 3, 1, T3)
+14- (:=, T3, , counter)
+15- (-, 4, 1, T4)
+16- (:=, T4, , counter)
+17- (BR, 22, , )
+18- (+, counter, 1, T5)
+19- (:=, T5, , counter)
+20- (+, counter, 1, T6)
+21- (:=, T6, , counter)
+==================
+Parsing successful
+Table des symboles :
+---------------------
+Nom: numbers | Type: tableau
+Nom: message | Type: chaine
+Nom: counter | Type: entier
+---------------------
