@@ -1,0 +1,2 @@
+*.expected -text
+Makefile text eol=lf
