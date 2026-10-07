@@ -1,2 +1,10 @@
-./a.out
+/htplc
+/syntaxique
+syntaxique.tab.c
+syntaxique.tab.h
+lex.yy.c
 a.out
+analyseur
+lexer
+input.txt
+output.txt

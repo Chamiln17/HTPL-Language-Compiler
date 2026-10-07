@@ -1,0 +1,3 @@
+*.expected -text
+Makefile text eol=lf
+*.htpl text eol=lf
