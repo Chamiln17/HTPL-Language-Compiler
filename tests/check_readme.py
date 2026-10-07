@@ -5,7 +5,7 @@ The credits checks run only when the owner's local credits note is given (it is 
 - every ```text block that contains "=== Quadruplets ===" is a contiguous substring of examples/test.expected
 - every ```htpl block with <program> is accepted by htplc
 - every relative link and image resolves to an existing file
-- with a credits note: course line, team (in order) and contribution text appear verbatim
+- with a credits note: course line and team (in order) appear verbatim
 - a "Current limitations" section with 1-4 bullets links to docs/language.md#limitations
 - README.fr.md: same heading structure, identical non-Mermaid code blocks, links/image resolve,
   names exact and in order, and each README links to the other in its first lines
@@ -48,12 +48,10 @@ if credits:
     c = credits.read_text(encoding="utf-8")
     course = re.search(r'Course line: "([^"]+)"', c).group(1)
     team = re.search(r"no roles: (.+)", c).group(1).split(", ")
-    owner, contrib = re.search(r"My contribution \((.+?)\): (.+)", c).groups()
     right, wrong = re.search(r'Spelling: "(\w+)" \(not "(\w+)"', c).groups()
     check(course in text, "course line verbatim")
     pos = [text.find(n) for n in team]
     check(all(p >= 0 for p in pos) and pos == sorted(pos), "team verbatim, alphabetical order")
-    check(contrib.strip() in text, "contribution verbatim")
     check(wrong not in text, "no misspelled owner name")
 
 lim = text.split("## Current limitations")[1].split("\n## ")[0] if "## Current limitations" in text else ""
@@ -82,7 +80,7 @@ check("docs/assets/htpl.webp" in fr.split("\n## ")[0], "fr: logo at the top")
 if credits:
     pos = [fr.find(n) for n in team]
     check(all(p >= 0 for p in pos) and pos == sorted(pos), "fr: team verbatim, alphabetical order")
-    check(owner in fr and wrong not in fr, "fr: owner name exact")
+    check(wrong not in fr, "fr: no misspelled owner name")
 top = lambda t: "\n".join(t.splitlines()[:8])
 check("](README.fr.md)" in top(text), "en: switch link to README.fr.md at the top")
 check("](README.md)" in top(fr), "fr: switch link to README.md at the top")

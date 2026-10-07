@@ -121,5 +121,3 @@ La liste complète, avec des exemples, se trouve dans la [référence du langage
 Projet de compilation, 2CS, filière SIL, ESI, 2024–2025
 
 Équipe : Arabet Mohamed Ilyes, Bengherbia Abdelkarim, Bouacha Chamel Nadir, Mezenner Fares, Yekene Sofiane
-
-**Ma contribution** (Chamel Nadir Bouacha) : conception et réalisation de l'analyse syntaxique, conception de la priorité des opérateurs pour les expressions arithmétiques, et conception d'ensemble du projet.
