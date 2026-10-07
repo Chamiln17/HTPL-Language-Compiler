@@ -17,7 +17,12 @@ run: htplc
 check: htplc
 	./htplc < examples/test.htpl | diff -u examples/test.expected -
 
+# Docs samples run through htplc; credits are checked only when the owner's local note exists.
+test-docs: htplc
+	python3 tests/check_docs.py . ./htplc
+	python3 tests/check_readme.py . ./htplc $(wildcard .local/readme-credits.md)
+
 clean:
 	rm -f htplc src/syntaxique.tab.c src/syntaxique.tab.h src/lex.yy.c
 
-.PHONY: all run check clean
+.PHONY: all run check test-docs clean

@@ -51,6 +51,7 @@ On Windows, install [WSL](https://learn.microsoft.com/windows/wsl/install) with 
 make          # build htplc
 make run      # compile examples/test.htpl
 make check    # compare the output with examples/test.expected
+make test-docs  # run the doc samples through htplc and check links (needs python3)
 make clean    # remove htplc and the generated sources
 ```
 
