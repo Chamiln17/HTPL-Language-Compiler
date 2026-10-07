@@ -121,5 +121,3 @@ The full list, with examples, is in the [language reference](docs/language.md#li
 Compilation project, 2CS, SIL track, ESI, 2024–2025
 
 Team: Arabet Mohamed Ilyes, Bengherbia Abdelkarim, Bouacha Chamel Nadir, Mezenner Fares, Yekene Sofiane
-
-**My contribution** (Chamel Nadir Bouacha): design and implementation of the syntax analysis, operator-precedence design for arithmetic expressions, and overall project design.
