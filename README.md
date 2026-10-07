@@ -1,3 +1,5 @@
+English | [Français](README.fr.md)
+
 <p align="center">
   <img src="docs/assets/htpl.webp" alt="HTPL logo" width="320">
 </p>
