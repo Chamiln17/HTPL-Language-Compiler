@@ -6,5 +6,6 @@ lex.yy.c
 lexical-lexemes
 a.out
 analyseur
+lexer
 input.txt
 output.txt

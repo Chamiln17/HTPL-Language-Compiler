@@ -1,19 +1,19 @@
-htplc: syntaxique.tab.c lex.yy.c tableSymboles.c tableSymbole.h
-	gcc -o $@ syntaxique.tab.c tableSymboles.c lex.yy.c -lfl
+htplc: src/syntaxique.tab.c src/lex.yy.c src/tableSymboles.c src/tableSymbole.h
+	gcc -o $@ src/syntaxique.tab.c src/tableSymboles.c src/lex.yy.c -lfl
 
-syntaxique.tab.c syntaxique.tab.h &: syntaxique.y
-	bison -d syntaxique.y
+src/syntaxique.tab.c src/syntaxique.tab.h &: src/syntaxique.y
+	bison -d -o src/syntaxique.tab.c src/syntaxique.y
 
-lex.yy.c: htpl_lexer.l syntaxique.tab.h
-	flex htpl_lexer.l
+src/lex.yy.c: src/htpl_lexer.l src/syntaxique.tab.h
+	flex -o $@ src/htpl_lexer.l
 
 run: htplc
-	./htplc < test.htpl
+	./htplc < examples/test.htpl
 
 check: htplc
-	./htplc < test.htpl | diff -u test.expected -
+	./htplc < examples/test.htpl | diff -u examples/test.expected -
 
 clean:
-	rm -f htplc syntaxique.tab.c syntaxique.tab.h lex.yy.c lexical-lexemes
+	rm -f htplc src/syntaxique.tab.c src/syntaxique.tab.h src/lex.yy.c lexical-lexemes
 
 .PHONY: run check clean
