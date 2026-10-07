@@ -1,0 +1,13 @@
+<program>
+<variables>
+    <int name="i"/>
+    <array name="v" type="int" size=(3)>
+        <element value=(1)/>
+        <element value=(2)/>
+    </array>
+    <float name="f">(1.5)</float>
+</variables>
+<instructions>
+    <assign i=(2)/>
+</instructions>
+</program>

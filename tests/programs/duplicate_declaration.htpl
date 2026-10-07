@@ -1,0 +1,8 @@
+<program>
+<variables>
+    <int name="a">(1)</int>
+    <int name="a">(2)</int>
+</variables>
+<instructions>
+</instructions>
+</program>

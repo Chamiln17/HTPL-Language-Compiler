@@ -15,7 +15,7 @@ run: htplc
 	./htplc < examples/test.htpl
 
 check: htplc
-	./htplc < examples/test.htpl | diff -u examples/test.expected -
+	sh tests/run.sh ./htplc
 
 # Docs samples run through htplc; credits are checked only when the owner's local note exists.
 test-docs: htplc

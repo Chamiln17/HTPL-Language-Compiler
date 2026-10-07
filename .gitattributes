@@ -1,3 +1,4 @@
 *.expected -text
 Makefile text eol=lf
 *.htpl text eol=lf
+*.sh text eol=lf

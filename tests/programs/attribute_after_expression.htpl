@@ -1,0 +1,8 @@
+<program>
+<variables>
+    <array name="v" size=(2) type="int"/>
+</variables>
+<instructions>
+    <assign v[1]=(7)/>
+</instructions>
+</program>

@@ -1,0 +1,12 @@
+
+=== Quadruplets ===
+0- (:=, 4, , n)
+1- (PRINT, "a message longer than fourteen characters", , )
+2- (*, n, 2, T0)
+3- (PRINT, T0, , )
+==================
+Parsing successful
+Table des symboles :
+---------------------
+Nom: n | Type: entier
+---------------------
