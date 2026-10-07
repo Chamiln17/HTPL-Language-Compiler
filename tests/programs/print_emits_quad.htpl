@@ -1,0 +1,9 @@
+<program>
+<variables>
+    <int name="n">(4)</int>
+</variables>
+<instructions>
+    <print value="a message longer than fourteen characters"/>
+    <print value=(n * 2)/>
+</instructions>
+</program>

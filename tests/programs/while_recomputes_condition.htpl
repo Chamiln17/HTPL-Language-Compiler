@@ -1,0 +1,10 @@
+<program>
+<variables>
+    <int name="i">(0)</int>
+</variables>
+<instructions>
+    <while condition=(i << 3)>
+        <assign i=(i + 1)/>
+    </while>
+</instructions>
+</program>

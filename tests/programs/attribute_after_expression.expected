@@ -1,0 +1,11 @@
+
+=== Quadruplets ===
+0- (Bounds, 1, 2, )
+1- (ADEC, v, , )
+2- (:=, 7, , v[1])
+==================
+Parsing successful
+Table des symboles :
+---------------------
+Nom: v | Type: tableau
+---------------------

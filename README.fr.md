@@ -59,7 +59,7 @@ make clean    # supprime htplc et les sources générées
 
 ## Exemple de sortie
 
-`make run` affiche d'abord une trace de chaque token lu, puis les quadruplets. Cet extrait est la liste des quadruplets pour [examples/test.htpl](examples/test.htpl), copiée depuis [examples/test.expected](examples/test.expected) :
+`make run` affiche les quadruplets, puis `Parsing successful` et la table des symboles (`./htplc -t` affiche aussi chaque token lu). Cet extrait est la liste des quadruplets pour [examples/test.htpl](examples/test.htpl), copiée depuis [examples/test.expected](examples/test.expected) :
 
 ```text
 === Quadruplets ===
@@ -67,28 +67,30 @@ make clean    # supprime htplc et les sources générées
 1- (:=, "Test", , message)
 2- (Bounds, 1, 5, )
 3- (ADEC, numbers, , )
-4- (:=, 2, , numbers[1])
-5- (:=, 1, , numbers[2])
-6- (>, counter, 0, T0)
-7- (BZ, 11, , T0)
-8- (+, numbers[1], 1, T1)
-9- (:=, T1, , numbers[2])
-10- (BR, 7, , )
-11- (==, counter, 0, T2)
-12- (BZ, 18, , T2)
-13- (-, 3, 1, T3)
-14- (:=, T3, , counter)
-15- (-, 4, 1, T4)
-16- (:=, T4, , counter)
-17- (BR, 22, , )
-18- (+, counter, 1, T5)
-19- (:=, T5, , counter)
-20- (+, counter, 1, T6)
-21- (:=, T6, , counter)
+4- (:=, 1, , numbers[1])
+5- (:=, 2, , numbers[2])
+6- (PRINT, "Counter initialized to 10", , )
+7- (>, counter, 0, T0)
+8- (BZ, 13, , T0)
+9- (+, numbers[1], 1, T1)
+10- (:=, T1, , numbers[2])
+11- (PRINT, "Counter: + counter", , )
+12- (BR, 7, , )
+13- (==, counter, 0, T2)
+14- (BZ, 20, , T2)
+15- (-, 3, 1, T3)
+16- (:=, T3, , counter)
+17- (-, 4, 1, T4)
+18- (:=, T4, , counter)
+19- (BR, 24, , )
+20- (+, counter, 1, T5)
+21- (:=, T5, , counter)
+22- (+, counter, 1, T6)
+23- (:=, T6, , counter)
 ==================
 ```
 
-Chaque ligne a la forme `index- (opérateur, opérande 1, opérande 2, résultat)`. `BZ` saute quand son opérande vaut zéro, `BR` saute sans condition, et `T0`, `T1`, ... sont des temporaires. Après la liste, `htplc` affiche `Parsing successful` puis la table des symboles.
+Chaque ligne a la forme `index- (opérateur, opérande 1, opérande 2, résultat)`. `BZ` saute quand son opérande vaut zéro, `BR` saute sans condition, `PRINT` affiche une valeur, et `T0`, `T1`, ... sont des temporaires.
 
 ## Étapes du projet
 
@@ -102,10 +104,9 @@ Le projet a été construit en trois étapes. Seule la dernière correspond au c
 
 ## Limites actuelles
 
-- La vérification des types ne couvre que les déclarations et les affectations, et les éléments de tableau ne sont vérifiés qu'en partie.
-- Une boucle `while` ne réévalue pas sa condition : elle revient au test et saute le code qui calcule la condition.
-- `print` ne génère aucun quadruplet.
-- Les tampons ont une taille fixe : les champs d'un quadruplet contiennent 14 caractères, et un tableau garde au plus 10 éléments initiaux.
+- La vérification des types porte sur le texte d'une valeur : tout identificateur est accepté pour une cible `int`, `float` ou `boolean`, et les éléments de tableau ne sont pas vérifiés.
+- La compilation s'arrête à la première erreur, qui indique le dernier token lu.
+- Un programme contient au plus 1000 quadruplets, et un tableau au plus 10 éléments initiaux.
 
 La liste complète, avec des exemples, se trouve dans la [référence du langage](docs/language.md#limitations).
 

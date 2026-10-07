@@ -3,26 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "tableSymbole.h"
-
-typedef struct {
-    char* name;
-    union {
-        int intVal;
-        float floatVal;
-        char* strVal;
-        bool boolVal;
-    } value;
-    DataType type;
-} AttributeValue;
-
-
-typedef struct {
-    char* values[10];
-    int count;
-} elementsArray;
-
-#include "syntaxique.tab.h"
+#include "syntaxique.tab.h" // brings tableSymbole.h and the types used by the %union
 
 
 
@@ -32,6 +13,7 @@ typedef struct {
 extern void yysuccess(char *s);
 extern void yyerror(const char *s);
 extern int currentColumn;
+extern int trace; // set by htplc -t
 
 // Global variable to hold the current token type
 int current_token;
@@ -103,14 +85,14 @@ void token_action(int token, char* text, FILE* output_file) {
             fprintf(output_file, "%s , %s \n", token_name , text);
         }
     }
-    else {
+    else if (trace) {
         printf("Token: %d, Content: %s\n", token, text);
     }
 }
 
 %}
 
-%option noyywrap
+%option noyywrap yylineno
 
 chiffre     [0-9]
 ID          [a-zA-Z_][a-zA-Z0-9_]* 

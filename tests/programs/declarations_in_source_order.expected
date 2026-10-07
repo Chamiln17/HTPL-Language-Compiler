@@ -1,0 +1,17 @@
+
+=== Quadruplets ===
+0- (:=, 0, , i)
+1- (Bounds, 1, 3, )
+2- (ADEC, v, , )
+3- (:=, 1, , v[1])
+4- (:=, 2, , v[2])
+5- (:=, 1.500000, , f)
+6- (:=, 2, , i)
+==================
+Parsing successful
+Table des symboles :
+---------------------
+Nom: f | Type: flottant
+Nom: i | Type: entier
+Nom: v | Type: tableau
+---------------------

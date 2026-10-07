@@ -59,7 +59,7 @@ make clean    # remove htplc and the generated sources
 
 ## Sample output
 
-`make run` first prints a trace of every token read, then the quadruples. This excerpt is the quadruple listing for [examples/test.htpl](examples/test.htpl), copied from [examples/test.expected](examples/test.expected):
+`make run` prints the quadruples, then `Parsing successful` and the symbol table (`./htplc -t` also prints every token as it is read). This excerpt is the quadruple listing for [examples/test.htpl](examples/test.htpl), copied from [examples/test.expected](examples/test.expected):
 
 ```text
 === Quadruplets ===
@@ -67,28 +67,30 @@ make clean    # remove htplc and the generated sources
 1- (:=, "Test", , message)
 2- (Bounds, 1, 5, )
 3- (ADEC, numbers, , )
-4- (:=, 2, , numbers[1])
-5- (:=, 1, , numbers[2])
-6- (>, counter, 0, T0)
-7- (BZ, 11, , T0)
-8- (+, numbers[1], 1, T1)
-9- (:=, T1, , numbers[2])
-10- (BR, 7, , )
-11- (==, counter, 0, T2)
-12- (BZ, 18, , T2)
-13- (-, 3, 1, T3)
-14- (:=, T3, , counter)
-15- (-, 4, 1, T4)
-16- (:=, T4, , counter)
-17- (BR, 22, , )
-18- (+, counter, 1, T5)
-19- (:=, T5, , counter)
-20- (+, counter, 1, T6)
-21- (:=, T6, , counter)
+4- (:=, 1, , numbers[1])
+5- (:=, 2, , numbers[2])
+6- (PRINT, "Counter initialized to 10", , )
+7- (>, counter, 0, T0)
+8- (BZ, 13, , T0)
+9- (+, numbers[1], 1, T1)
+10- (:=, T1, , numbers[2])
+11- (PRINT, "Counter: + counter", , )
+12- (BR, 7, , )
+13- (==, counter, 0, T2)
+14- (BZ, 20, , T2)
+15- (-, 3, 1, T3)
+16- (:=, T3, , counter)
+17- (-, 4, 1, T4)
+18- (:=, T4, , counter)
+19- (BR, 24, , )
+20- (+, counter, 1, T5)
+21- (:=, T5, , counter)
+22- (+, counter, 1, T6)
+23- (:=, T6, , counter)
 ==================
 ```
 
-Each line is `index- (operator, operand 1, operand 2, result)`. `BZ` jumps when its operand is zero, `BR` jumps unconditionally, and `T0`, `T1`, ... are temporaries. After the listing, `htplc` prints `Parsing successful` and the symbol table.
+Each line is `index- (operator, operand 1, operand 2, result)`. `BZ` jumps when its operand is zero, `BR` jumps unconditionally, `PRINT` outputs a value, and `T0`, `T1`, ... are temporaries.
 
 ## Project stages
 
@@ -102,10 +104,9 @@ The project was built in three steps. Only the last one is the current compiler.
 
 ## Current limitations
 
-- Type checking covers declarations and assignments only, and array elements are only partially checked.
-- A `while` loop does not re-evaluate its condition: it jumps back to the test and skips the code that computes the condition.
-- `print` generates no quadruples.
-- Buffers have fixed sizes: quadruple fields hold 14 characters, and an array keeps at most 10 initial elements.
+- Type checks look at the text of a value: any identifier passes for `int`, `float` and `boolean` targets, and array elements are not type-checked.
+- Errors stop at the first one and point at the last token read.
+- A program holds at most 1000 quadruples, and an array at most 10 initial elements.
 
 The full list, with examples, is in the [language reference](docs/language.md#limitations).
 

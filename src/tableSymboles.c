@@ -12,7 +12,7 @@ unsigned int hash(const char *name)
     {
         hash = (hash * 31) + *name++;
     }
-    return 2;
+    return hash % TABLE_SIZE;
 }
 
 // Initialiser la table des symboles
@@ -35,7 +35,6 @@ bool addSymbol(SymbolTable *table, const char *name, DataType type)
     {
         if (strcmp(current->name, name) == 0)
         {
-            printf("Erreur : Le symbole '%s' existe dejà.\n", name);
             return false;
         }
         current = current->next;

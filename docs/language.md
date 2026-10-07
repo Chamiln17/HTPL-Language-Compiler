@@ -34,7 +34,7 @@ Rules, from the `program` and `variables_list` rules of the grammar:
 
 - The order is fixed: `<variables>` (if present) comes before `<instructions>`.
 - `<instructions>` is mandatory, but may be empty.
-- `<variables>` is optional, but if it is present it must contain at least one declaration. `<variables></variables>` is a syntax error.
+- `<variables>` is optional and may be empty.
 
 ## Lexical elements
 
@@ -70,10 +70,7 @@ Tags carry attributes of the form `name=value`. A value is either a string liter
 - `name="counter"`, `type="int"`, `value="text"`
 - `size=(5)`, `condition=(counter >> 0)`, `counter=(counter + 1)`
 
-The parser keeps attributes in order, with two consequences you have to respect:
-
-- The first attribute is the one that counts. A declaration's `name` attribute and an assignment's target must come first.
-- Everything after a parenthesised attribute is dropped. In an `<array>` declaration, `size=(n)` must therefore come last; `<array name="v" size=(2) type="int">` fails with `Invalid array declaration: missing name, type, or size`.
+The parser keeps attributes in order, and the first attribute is the one that counts: a declaration's `name` attribute, an assignment's target, an `<if>` or `<while>` condition and a `<print>` value must come first. The attributes after it can come in any order, so `<array name="v" size=(2) type="int"/>` and `<array name="v" type="int" size=(2)/>` are the same declaration. A tag holds at most 10 attributes.
 
 ## Variables
 
@@ -132,7 +129,7 @@ A self-closing `<int .../>` is only registered in the symbol table when it is th
 
 ### Arrays
 
-An array has a `name`, an element `type` and a `size`, in that order, and contains zero or more `<element value=.../>` tags. This excerpt comes from the reference program:
+An array has a `name` (first), an element `type` (`"int"`, `"float"`, `"string"` or `"boolean"`) and a positive `size`, and contains zero or more `<element value=.../>` tags, at most `size` and at most 10. This excerpt comes from the reference program:
 
 ```htpl
 <array name="numbers" type="int" size=(5)>
@@ -155,7 +152,7 @@ Indexing is 1-based (the compiler emits bounds `1..size`). An array element is w
 </program>
 ```
 
-The compiler stores the initial elements in reverse order: in the excerpt above, `numbers[1]` receives `2` and `numbers[2]` receives `1` (see [examples/test.expected](../examples/test.expected), quads 4 and 5).
+The initial elements fill the array from index 1 in source order: in the excerpt above, `numbers[1]` receives `1` and `numbers[2]` receives `2` (see [examples/test.expected](../examples/test.expected), quads 4 and 5).
 
 ## Instructions
 
@@ -233,13 +230,13 @@ A wrong attribute name on `<while>` also reports `Invalid attribute for if state
 
 ### print
 
-`<print .../>` is self-closing and takes at least one attribute of any name, usually `value`. From the reference program:
+`<print .../>` is self-closing and takes a `value` attribute: a string literal or an expression in parentheses. From the reference program:
 
 ```htpl
 <print value="Counter initialized to 10"/>
 ```
 
-The compiler checks the syntax of `print` but generates no code for it (see [Limitations](#limitations)).
+It compiles to a `PRINT` quadruple holding the string, or the variable or temporary that holds the expression's value.
 
 ## Expressions
 
@@ -303,7 +300,7 @@ A comparison (the `expr_logique` rule) has exactly one operator between two arit
 
 The checks live in the declaration and `assignment` actions of [src/syntaxique.y](../src/syntaxique.y) and the helpers `isInteger`, `isFloat`, `isBoolean`, `isString` and `isVariable` in [src/tableSymboles.c](../src/tableSymboles.c). They look at the text of the value, not at the type of what it names:
 
-- Assigning to a variable that was never declared fails with `Variable undefined`.
+- Assigning to a variable that was never declared fails with `Variable '<name>' undefined`. Declaring a name twice fails with `Variable '<name>' already declared`.
 - An `int` target accepts an integer literal or any identifier-shaped value (a variable or a temporary). `(2.5)` and `"text"` are rejected with `Invalid value for integer variable`.
 - A `float` target accepts float literals, integer literals and identifiers.
 - A `string` target accepts only a string literal.
@@ -313,45 +310,14 @@ Because any identifier passes, an `int` can be assigned a `string` variable, and
 
 ## Limitations
 
-These follow from the current code and are not fixed. Each rejected example below was run through `htplc`.
+These follow from the current code. Each rejected example below was run through `htplc`.
 
-- **Self-closing `int` not last.** The grammar rule for `<int .../>` followed by more declarations never calls `addSymbol`, so the variable is unknown later:
-
-  ```text
-  <program>
-  <variables>
-      <int name="i"/>
-      <int name="j">(1)</int>
-  </variables>
-  <instructions>
-      <assign i=(2)/>
-  </instructions>
-  </program>
-  ```
-
-  This fails with `Variable undefined`.
-
-- **Declaration order in the output.** Self-closing declarations, and arrays followed by more declarations, emit their code after the declarations that follow them. The meaning is unchanged but the quad listing is out of source order.
-- **Array elements are stored in reverse** (see [Arrays](#arrays)).
-- **Loop conditions are evaluated once.** A `while` loop jumps back to its test and skips the code that computes the condition, so the condition value is never recomputed. See [the architecture note](architecture.md#while-loops).
-- **`print` generates no code.** Expressions inside its attributes still produce arithmetic quads, but nothing consumes them.
-- **Duplicate declarations** of scalars print `Erreur : Le symbole 'a' existe dejà.` and compilation continues. A duplicate array name is a fatal error.
-- **Error positions.** Errors always report `line 1`; the character position counts from the start of the current line. The first error stops compilation.
-- **Fixed sizes.** Quad fields hold 14 characters, so long identifiers, strings or array references are truncated or overflow. An `<array>` keeps at most 10 initial elements and a tag at most 10 attributes.
+- **Type checks are textual.** See [Type checking](#type-checking): any identifier passes for `int`, `float` and `boolean` targets, right-hand-side names are not checked for declaration, and array elements are not type-checked.
+- **Error positions.** An error reports the line and column of the last token read, which is usually just after the construct at fault. The first error stops compilation.
+- **Fixed limits.** A program holds at most 1000 quadruples, a tag at most 10 attributes and an `<array>` at most 10 initial elements; going over is a compile error.
 - **Not available:** negative literals, unary minus, `!=`, logical connectives, chained comparisons, string expressions.
 
 Rejected programs that people write by mistake:
-
-```text
-<program>
-<variables>
-</variables>
-<instructions>
-</instructions>
-</program>
-```
-
-An empty `<variables>` section is a syntax error; leave the section out instead.
 
 ```text
 <program>
