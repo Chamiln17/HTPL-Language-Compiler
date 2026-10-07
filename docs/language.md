@@ -2,7 +2,7 @@
 
 HTPL is a small imperative language written with HTML-like tags. This reference describes what the current compiler (`htplc`, built from [src/syntaxique.y](../src/syntaxique.y) and [src/htpl_lexer.l](../src/htpl_lexer.l)) actually accepts. Where the original language annex ([reports/Annexe langage.pdf](reports/Annexe%20langage.pdf), in French) says something else, the grammar wins; the differences are listed at the end.
 
-Every `htpl` code block below is either a complete program that `htplc` accepts or an excerpt of the reference program [examples/test.htpl](../examples/test.htpl). Blocks marked `text` show programs that `htplc` rejects.
+Every `htpl` code block below is either a complete program that `htplc` accepts or an excerpt of the reference program [examples/test.htpl](../examples/test.htpl). Blocks marked `text` show programs that `htplc` rejects, or quotations from the annex.
 
 ## Program structure
 
@@ -141,7 +141,7 @@ An array has a `name`, an element `type` and a `size`, in that order, and contai
 </array>
 ```
 
-Indexing is 1-based (the compiler emits bounds `1..size`). An array element is written `name[index]`, where the index is an arithmetic expression. Elements can be read in expressions and assigned:
+Indexing is 1-based (the compiler emits bounds `1..size`). An array element is written `name[index]`, where the index is an arithmetic expression. Elements can be read in expressions and assigned (a bare element as the whole value of a scalar assignment is rejected; see [Type checking](#type-checking)):
 
 ```htpl
 <program>
@@ -233,7 +233,7 @@ A wrong attribute name on `<while>` also reports `Invalid attribute for if state
 
 ### print
 
-`<print .../>` is self-closing and accepts any attributes, usually `value`. From the reference program:
+`<print .../>` is self-closing and takes at least one attribute of any name, usually `value`. From the reference program:
 
 ```htpl
 <print value="Counter initialized to 10"/>
@@ -309,7 +309,7 @@ The checks live in the declaration and `assignment` actions of [src/syntaxique.y
 - A `string` target accepts only a string literal.
 - A `boolean` target accepts `1`, `0`, `true`, `false` and identifiers.
 
-Because any identifier passes, an `int` can be assigned a `string` variable, and identifiers used on the right-hand side are not checked for declaration. Array elements are not type-checked at all.
+Because any identifier passes, an `int` can be assigned a `string` variable, and identifiers used on the right-hand side are not checked for declaration. Array elements are not type-checked at all as targets. As a value, a bare element is rejected for scalar targets because `v[1]` does not look like an identifier: `<assign x=(v[1])/>` with `x` an `int` fails with `Invalid value for integer variable`, while `<assign x=(v[1] + 0)/>` passes because the sum is a temporary.
 
 ## Limitations
 
